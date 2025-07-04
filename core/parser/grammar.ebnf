@@ -1,0 +1,24 @@
+File        = FileHeader, Header+ ; 
+  # A file starts with a single FileHeader, followed by one or more Header sections.
+
+FileHeader  = "FileHeader" ; 
+  # The first line of the file, containing information about the file.
+
+Header      = "Header", { Passage | Question } ; 
+  # A header introduces a new section, and can contain multiple Passages and/or Questions.
+
+Passage     = "Passage", Content*, Question* ; 
+  # A Passage can contain multiple Content lines and multiple Questions, which may or may not be present.
+
+Content     = "Content" ; 
+  # A Content line represents a block of text inside a Passage (e.g., a paragraph, description, etc.).
+
+Question    = "Question", LearnMore? ; 
+  # A Question is a prompt that may optionally be followed by a LearnMore explanation.
+
+LearnMore   = "LearnMore" ; 
+  # A LearnMore line provides additional information about the preceding Question.
+
+# Behavior note:
+# - Questions are associated with the most recent open Passage, if one exists.
+# - If no Passage is open, Questions are attached directly to the Header.
