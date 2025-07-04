@@ -1,4 +1,4 @@
-package lexer
+package preparser
 
 type ParsedLineInfo struct {
 	Number      int         // Line number in the file
