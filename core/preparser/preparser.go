@@ -27,80 +27,10 @@ func NewPreparser(lines []LineInfo, parserType string) *Preparser {
 //   - []ParsedLineInfo: Array of parsed line information
 //   - *PreParsingError: Any error that occurred during parsing
 func (p *Preparser) Parse() ([]ParsedLineInfo, *PreParsingError) {
-	parsedLines := []ParsedLineInfo{}
+	parsedLines := make([]ParsedLineInfo, 0, len(p.Lines))
+	
 	for _, line := range p.Lines {
-		// Use type-safe parsing based on line type
-		var result any
-		var err *PreParsingError
-		
-		switch line.Type {
-		case TokenTypeQuestion:
-			parser, parseErr := GetParserForType[*QuestionResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypeHeader:
-			parser, parseErr := GetParserForType[HeaderResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypeComment:
-			parser, parseErr := GetParserForType[*CommentResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypeEmpty:
-			parser, parseErr := GetParserForType[*EmptyLineResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypeFileHeader:
-			parser, parseErr := GetParserForType[*FileHeaderResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypePassage:
-			parser, parseErr := GetParserForType[*PassageResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypeLearnMore:
-			parser, parseErr := GetParserForType[*LearnMoreResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypeContent:
-			parser, parseErr := GetParserForType[*ContentResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		case TokenTypeBinary:
-			parser, parseErr := GetParserForType[*BinaryResult](line.Type, line)
-			if parseErr != nil {
-				err = parseErr
-			} else {
-				result, err = parser.Parse(line)
-			}
-		default:
-			return nil, NewPreParsingError(CodeValidation, fmt.Sprintf("unknown line type: %v", line.Type), line)
-		}
-		
+		result, err := p.parseLine(line)
 		if err != nil {
 			return nil, err
 		}
@@ -114,4 +44,71 @@ func (p *Preparser) Parse() ([]ParsedLineInfo, *PreParsingError) {
 		parsedLines = append(parsedLines, info)
 	}
 	return parsedLines, nil
+}
+
+// parseLine handles the parsing of a single line based on its type
+func (p *Preparser) parseLine(line LineInfo) (ParsedValue, *PreParsingError) {
+	// Use the registry directly - this is the single source of truth
+	if parser, exists := parserRegistry[line.Type]; exists {
+		// The parser is already the correct type, just call it
+		switch p := parser.(type) {
+		case LineParser[*QuestionResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{Question: result}, nil
+		case LineParser[*HeaderResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{Header: result}, nil
+		case LineParser[*CommentResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{Comment: result}, nil
+		case LineParser[*EmptyLineResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{Empty: result}, nil
+		case LineParser[*FileHeaderResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{FileHeader: result}, nil
+		case LineParser[*PassageResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{Passage: result}, nil
+		case LineParser[*LearnMoreResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{LearnMore: result}, nil
+		case LineParser[*ContentResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{Content: result}, nil
+		case LineParser[*BinaryResult]:
+			result, err := p.Parse(line)
+			if err != nil {
+				return ParsedValue{}, err
+			}
+			return ParsedValue{Binary: result}, nil
+		}
+	}
+	
+	// If we get here, no parser was found
+	return ParsedValue{}, NewPreParsingError(CodeValidation, fmt.Sprintf("unknown line type: %v", line.Type), line)
 }

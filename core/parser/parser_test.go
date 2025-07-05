@@ -23,34 +23,34 @@ func TestParser(t *testing.T) {
 				{
 					Number: 1,
 					Type:   lexer.TokenTypeFileHeader,
-					ParsedValue: &preparser.FileHeaderResult{
+					ParsedValue: preparser.ParsedValue{FileHeader: &preparser.FileHeaderResult{
 						Title: "AP® African American Studies",
-					},
+					}},
 				},
 				{
 					Number: 2,
 					Type:   lexer.TokenTypeHeader,
-					ParsedValue: []string{
+					ParsedValue: preparser.ParsedValue{Header: &preparser.HeaderResult{Parts: []string{
 						"Advanced Placement (AP)",
 						"AP African American Studies",
 						"Origins of the African Diaspora (900 BCE - 16th Century)",
 						"Introduction to African American Studies",
-					},
+					}}},
 				},
 				{
 					Number: 3,
 					Type:   lexer.TokenTypeComment,
-					ParsedValue: &preparser.CommentResult{
+					ParsedValue: preparser.ParsedValue{Comment: &preparser.CommentResult{
 						Text: "This is a comment",
-					},
+					}},
 				},
 				{
 					Number: 4,
 					Type:   lexer.TokenTypeQuestion,
-					ParsedValue: &preparser.QuestionResult{
+					ParsedValue: preparser.ParsedValue{Question: &preparser.QuestionResult{
 						QuestionText: "What distinguishes African American Studies as an interdisciplinary field?",
 						AnswerText:   "It integrates history, anthropology, sociology, literature, and political science to analyze the experiences of African-descended peoples.",
-					},
+					}},
 				},
 			},
 			wantErr: false,
@@ -62,40 +62,40 @@ func TestParser(t *testing.T) {
 				{
 					Number: 1,
 					Type:   lexer.TokenTypeFileHeader,
-					ParsedValue: &preparser.FileHeaderResult{
+					ParsedValue: preparser.ParsedValue{FileHeader: &preparser.FileHeaderResult{
 						Title: "American College Testing (ACT)",
-					},
+					}},
 				},
 				{
 					Number: 2,
 					Type:   lexer.TokenTypeHeader,
-					ParsedValue: []string{
+					ParsedValue: preparser.ParsedValue{Header: &preparser.HeaderResult{Parts: []string{
 						"Entrance Exams",
 						"American College Testing (ACT)",
 						"English",
-					},
+					}}},
 				},
 				{
 					Number: 3,
 					Type:   lexer.TokenTypePassage,
-					ParsedValue: &preparser.PassageResult{
+					ParsedValue: preparser.ParsedValue{Passage: &preparser.PassageResult{
 						Text: "The Rise of Digital Libraries",
-					},
+					}},
 				},
 				{
 					Number: 4,
 					Type:   lexer.TokenTypeContent,
-					ParsedValue: &preparser.ContentResult{
+					ParsedValue: preparser.ParsedValue{Content: &preparser.ContentResult{
 						Text: "In the early 21st century, digital libraries emerged...",
-					},
+					}},
 				},
 				{
 					Number: 5,
 					Type:   lexer.TokenTypeQuestion,
-					ParsedValue: &preparser.QuestionResult{
+					ParsedValue: preparser.ParsedValue{Question: &preparser.QuestionResult{
 						QuestionText: "At first, many scholars and researchers were skeptical...",
 						AnswerText:   "No Change",
-					},
+					}},
 				},
 			},
 			wantErr: false,
@@ -107,29 +107,29 @@ func TestParser(t *testing.T) {
 				{
 					Number: 1,
 					Type:   lexer.TokenTypeFileHeader,
-					ParsedValue: &preparser.FileHeaderResult{
+					ParsedValue: preparser.ParsedValue{FileHeader: &preparser.FileHeaderResult{
 						Title: "Principles of Financial Accounting",
-					},
+					}},
 				},
 				{
 					Number: 2,
 					Type:   lexer.TokenTypeHeader,
-					ParsedValue: []string{
+					ParsedValue: preparser.ParsedValue{Header: &preparser.HeaderResult{Parts: []string{
 						"Colleges",
 						"Virginia",
 						"Old Dominion University (ODU)",
 						"Accounting (ACCT)",
 						"ACCT 201 Principles of Financial Accounting",
 						"Introduction to Financial Accounting",
-					},
+					}}},
 				},
 				{
 					Number: 3,
 					Type:   lexer.TokenTypeQuestion,
-					ParsedValue: &preparser.QuestionResult{
+					ParsedValue: preparser.ParsedValue{Question: &preparser.QuestionResult{
 						QuestionText: "What is financial accounting?",
 						AnswerText:   "Tracks financial transactions.",
-					},
+					}},
 				},
 			},
 			wantErr: false,
@@ -141,11 +141,11 @@ func TestParser(t *testing.T) {
 				{
 					Number: 1,
 					Type:   lexer.TokenTypeHeader,
-					ParsedValue: []string{
+					ParsedValue: preparser.ParsedValue{Header: &preparser.HeaderResult{Parts: []string{
 						"Colleges",
 						"Virginia",
 						"Old Dominion University (ODU)",
-					},
+					}}},
 				},
 			},
 			wantErr: true,
@@ -163,43 +163,43 @@ func TestParser(t *testing.T) {
 				{
 					Number: 1,
 					Type:   lexer.TokenTypeFileHeader,
-					ParsedValue: &preparser.FileHeaderResult{
+					ParsedValue: preparser.ParsedValue{FileHeader: &preparser.FileHeaderResult{
 						Title: "COMNAVIDFORINST 1550.1, Navy Information Dominance Forces Language Readiness Program (January 2019)",
-					},
+					}},
 				},
 				{
 					Number: 2,
 					Type:   lexer.TokenTypeHeader,
-					ParsedValue: []string{
+					ParsedValue: preparser.ParsedValue{Header: &preparser.HeaderResult{Parts: []string{
 						"Department of Defense (DoD)",
 						"United States Navy (USN)",
 						"COMNAVIDFORINST",
 						"COMNAVIDFORINST 1550.1",
 						"COMNAVIDFORINST 1550.1, Navy Information Dominance Forces Language Readiness Program (January 2019)",
-					},
+					}}},
 				},
 				{
 					Number: 3,
 					Type:   lexer.TokenTypeQuestion,
-					ParsedValue: &preparser.QuestionResult{
+					ParsedValue: preparser.ParsedValue{Question: &preparser.QuestionResult{
 						QuestionText: "What is the date of the COMNAVIFORINST 1550.1 instruction?",
 						AnswerText:   "4 Jan 2019",
-					},
+					}},
 				},
 				{
 					Number: 4,
 					Type:   lexer.TokenTypeLearnMore,
-					ParsedValue: &preparser.LearnMoreResult{
+					ParsedValue: preparser.ParsedValue{LearnMore: &preparser.LearnMoreResult{
 						Text: "COMNAVIFORINST 1550.1 4 Jan 2019 (Page 2)",
-					},
+					}},
 				},
 				{
 					Number: 5,
 					Type:   lexer.TokenTypeQuestion,
-					ParsedValue: &preparser.QuestionResult{
+					ParsedValue: preparser.ParsedValue{Question: &preparser.QuestionResult{
 						QuestionText: "Who leads the CTI Community Management Network according to the instruction?",
 						AnswerText:   "Commander, NAVIFOR",
-					},
+					}},
 				},
 			},
 			wantErr: false,

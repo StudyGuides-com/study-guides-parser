@@ -1,7 +1,6 @@
 package preparser
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/StudyGuides-com/study-guides-parser/cleanstring"
@@ -9,8 +8,8 @@ import (
 	"github.com/StudyGuides-com/study-guides-parser/core/utils"
 )
 
-// Parse implements LineParser for QuestionParser
-func (p *QuestionParser) Parse(lineInfo LineInfo) (*QuestionResult, *PreParsingError) {
+// ParseQuestion parses question lines
+func ParseQuestion(lineInfo LineInfo) (*QuestionResult, *PreParsingError) {
 	// Trim leading spaces before checking for prefix
 	trimmedLine := strings.TrimLeft(lineInfo.Text, " ")
 	if !utils.ListItemPrefixRegex.MatchString(trimmedLine) {
@@ -40,8 +39,8 @@ func (p *QuestionParser) Parse(lineInfo LineInfo) (*QuestionResult, *PreParsingE
 	}, nil
 }
 
-// Parse implements LineParser for HeaderParser
-func (p *HeaderParser) Parse(lineInfo LineInfo) (HeaderResult, *PreParsingError) {
+// ParseHeader parses header lines
+func ParseHeader(lineInfo LineInfo) (*HeaderResult, *PreParsingError) {
 	// Split the line by the colon ":" character
 	parts := strings.Split(lineInfo.Clean(), constants.ColonDelimiter)
 
@@ -56,11 +55,11 @@ func (p *HeaderParser) Parse(lineInfo LineInfo) (HeaderResult, *PreParsingError)
 	}
 
 	// Return the cleaned parts as a result
-	return cleanedParts, nil
+	return &HeaderResult{Parts: cleanedParts}, nil
 }
 
-// Parse implements LineParser for CommentParser
-func (p *CommentParser) Parse(lineInfo LineInfo) (*CommentResult, *PreParsingError) {
+// ParseComment parses comment lines
+func ParseComment(lineInfo LineInfo) (*CommentResult, *PreParsingError) {
 	if !strings.HasPrefix(lineInfo.Text, constants.CommentPrefix) || strings.HasPrefix(lineInfo.Text, constants.CommentDoublePrefix) {
 		return nil, NewPreParsingError(CodeValidation, "comment must start with exactly one #", lineInfo)
 	}
@@ -71,16 +70,16 @@ func (p *CommentParser) Parse(lineInfo LineInfo) (*CommentResult, *PreParsingErr
 	}, nil
 }
 
-// Parse implements LineParser for EmptyLineParser
-func (p *EmptyLineParser) Parse(lineInfo LineInfo) (*EmptyLineResult, *PreParsingError) {
+// ParseEmptyLine parses empty lines
+func ParseEmptyLine(lineInfo LineInfo) (*EmptyLineResult, *PreParsingError) {
 	if !cleanstring.New(lineInfo.Text).IsEmpty() {
 		return nil, NewPreParsingError(CodeValidation, "line must be empty or contain only whitespace", lineInfo)
 	}
 	return &EmptyLineResult{}, nil
 }
 
-// Parse implements LineParser for FileHeaderParser
-func (p *FileHeaderParser) Parse(lineInfo LineInfo) (*FileHeaderResult, *PreParsingError) {
+// ParseFileHeader parses file header lines
+func ParseFileHeader(lineInfo LineInfo) (*FileHeaderResult, *PreParsingError) {
 	if lineInfo.Number != constants.FirstLineNumber {
 		return nil, NewPreParsingError(CodeValidation, "file header must be on line 1", lineInfo)
 	}
@@ -95,8 +94,8 @@ func (p *FileHeaderParser) Parse(lineInfo LineInfo) (*FileHeaderResult, *PrePars
 	}, nil
 }
 
-// Parse implements LineParser for PassageParser
-func (p *PassageParser) Parse(lineInfo LineInfo) (*PassageResult, *PreParsingError) {
+// ParsePassage parses passage lines
+func ParsePassage(lineInfo LineInfo) (*PassageResult, *PreParsingError) {
 	lowerLine := strings.ToLower(lineInfo.Text)
 
 	// Find the index of "passage:" in the lowercased line
@@ -116,8 +115,8 @@ func (p *PassageParser) Parse(lineInfo LineInfo) (*PassageResult, *PreParsingErr
 	}, nil
 }
 
-// Parse implements LineParser for LearnMoreParser
-func (p *LearnMoreParser) Parse(lineInfo LineInfo) (*LearnMoreResult, *PreParsingError) {
+// ParseLearnMore parses learn more lines
+func ParseLearnMore(lineInfo LineInfo) (*LearnMoreResult, *PreParsingError) {
 	lowerLine := strings.ToLower(lineInfo.Text)
 	if !strings.HasPrefix(lowerLine, constants.LearnMorePrefix) {
 		return nil, NewPreParsingError(CodeValidation, "learn more line must start with 'Learn More:'", lineInfo)
@@ -133,8 +132,8 @@ func (p *LearnMoreParser) Parse(lineInfo LineInfo) (*LearnMoreResult, *PreParsin
 	}, nil
 }
 
-// Parse implements LineParser for ContentParser
-func (p *ContentParser) Parse(lineInfo LineInfo) (*ContentResult, *PreParsingError) {
+// ParseContent parses content lines
+func ParseContent(lineInfo LineInfo) (*ContentResult, *PreParsingError) {
 	// Content lines have no specific format requirements
 	// Just sanitize the text
 	text := cleanstring.New(lineInfo.Text).Clean()
@@ -146,8 +145,8 @@ func (p *ContentParser) Parse(lineInfo LineInfo) (*ContentResult, *PreParsingErr
 	}, nil
 }
 
-// Parse implements LineParser for BinaryParser
-func (p *BinaryParser) Parse(lineInfo LineInfo) (*BinaryResult, *PreParsingError) {
+// ParseBinary parses binary lines
+func ParseBinary(lineInfo LineInfo) (*BinaryResult, *PreParsingError) {
 	// Binary lines contain non-printable characters
 	// Return the original text as-is
 	return &BinaryResult{
@@ -155,51 +154,15 @@ func (p *BinaryParser) Parse(lineInfo LineInfo) (*BinaryResult, *PreParsingError
 	}, nil
 }
 
-// GetParserForType returns the appropriate parser for a given line type
-// This function is type-safe and returns the correct parser type for each token type
-func GetParserForType[T ParseResult](lineType TokenType, lineInfo LineInfo) (LineParser[T], *PreParsingError) {
-	switch lineType {
-	case TokenTypeQuestion:
-		if parser, ok := any(&QuestionParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypeHeader:
-		if parser, ok := any(&HeaderParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypeComment:
-		if parser, ok := any(&CommentParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypeEmpty:
-		if parser, ok := any(&EmptyLineParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypeFileHeader:
-		if parser, ok := any(&FileHeaderParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypePassage:
-		if parser, ok := any(&PassageParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypeLearnMore:
-		if parser, ok := any(&LearnMoreParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypeContent:
-		if parser, ok := any(&ContentParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	case TokenTypeBinary:
-		if parser, ok := any(&BinaryParser{}).(LineParser[T]); ok {
-			return parser, nil
-		}
-	default:
-		var zero LineParser[T]
-		return zero, NewPreParsingError(CodeValidation, fmt.Sprintf("unknown line type: %v", lineType), lineInfo)
-	}
-	
-	var zero LineParser[T]
-	return zero, NewPreParsingError(CodeValidation, fmt.Sprintf("parser type mismatch for %v", lineType), lineInfo)
+// parserRegistry maps token types to their corresponding parser functions
+var parserRegistry = map[TokenType]any{
+	TokenTypeQuestion:   ParserFunc[*QuestionResult](ParseQuestion),
+	TokenTypeHeader:     ParserFunc[*HeaderResult](ParseHeader),
+	TokenTypeComment:    ParserFunc[*CommentResult](ParseComment),
+	TokenTypeEmpty:      ParserFunc[*EmptyLineResult](ParseEmptyLine),
+	TokenTypeFileHeader: ParserFunc[*FileHeaderResult](ParseFileHeader),
+	TokenTypePassage:    ParserFunc[*PassageResult](ParsePassage),
+	TokenTypeLearnMore:  ParserFunc[*LearnMoreResult](ParseLearnMore),
+	TokenTypeContent:    ParserFunc[*ContentResult](ParseContent),
+	TokenTypeBinary:     ParserFunc[*BinaryResult](ParseBinary),
 }

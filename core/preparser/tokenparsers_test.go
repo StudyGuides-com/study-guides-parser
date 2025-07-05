@@ -87,18 +87,17 @@ func TestLineQuestionParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &QuestionParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParseQuestion(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("QuestionParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseQuestion() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				if got.QuestionText != tt.want.QuestionText {
-					t.Errorf("QuestionParser.Parse() question = %v, want %v", got.QuestionText, tt.want.QuestionText)
+					t.Errorf("ParseQuestion() question = %v, want %v", got.QuestionText, tt.want.QuestionText)
 				}
 				if got.AnswerText != tt.want.AnswerText {
-					t.Errorf("QuestionParser.Parse() answer = %v, want %v", got.AnswerText, tt.want.AnswerText)
+					t.Errorf("ParseQuestion() answer = %v, want %v", got.AnswerText, tt.want.AnswerText)
 				}
 			}
 		})
@@ -155,20 +154,19 @@ func TestLineHeaderParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &HeaderParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParseHeader(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("HeaderParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseHeader() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
-				if len(got) != len(tt.want) {
-					t.Errorf("HeaderParser.Parse() got %d parts, want %d", len(got), len(tt.want))
+				if len(got.Parts) != len(tt.want) {
+					t.Errorf("ParseHeader() got %d parts, want %d", len(got.Parts), len(tt.want))
 					return
 				}
-				for i, part := range got {
+				for i, part := range got.Parts {
 					if part != tt.want[i] {
-						t.Errorf("HeaderParser.Parse() part[%d] = %v, want %v", i, part, tt.want[i])
+						t.Errorf("ParseHeader() part[%d] = %v, want %v", i, part, tt.want[i])
 					}
 				}
 			}
@@ -229,15 +227,14 @@ func TestLineCommentParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &CommentParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParseComment(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("CommentParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseComment() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				if got.Text != tt.want.Text {
-					t.Errorf("CommentParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
+					t.Errorf("ParseComment() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -309,15 +306,14 @@ func TestLinePassageParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &PassageParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParsePassage(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("PassageParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParsePassage() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				if got.Text != tt.want.Text {
-					t.Errorf("PassageParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
+					t.Errorf("ParsePassage() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -389,15 +385,14 @@ func TestLineLearnMoreParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &LearnMoreParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParseLearnMore(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("LearnMoreParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseLearnMore() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				if got.Text != tt.want.Text {
-					t.Errorf("LearnMoreParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
+					t.Errorf("ParseLearnMore() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -457,15 +452,14 @@ func TestLineContentParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &ContentParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParseContent(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ContentParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseContent() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				if got.Text != tt.want.Text {
-					t.Errorf("ContentParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
+					t.Errorf("ParseContent() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -509,16 +503,15 @@ func TestLineEmptyLineParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &EmptyLineParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParseEmptyLine(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("EmptyLineParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseEmptyLine() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				// EmptyLineResult has no fields to check, just verify it's not nil
 				if got == nil {
-					t.Error("EmptyLineParser.Parse() returned nil result")
+					t.Error("ParseEmptyLine() returned nil result")
 				}
 			}
 		})
@@ -590,15 +583,14 @@ func TestLineFileHeaderParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := &FileHeaderParser{}
-			got, err := parser.Parse(tt.lineInfo)
+			got, err := ParseFileHeader(tt.lineInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("FileHeaderParser.Parse() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ParseFileHeader() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !tt.wantErr {
 				if got.Title != tt.want.Title {
-					t.Errorf("FileHeaderParser.Parse() title = %v, want %v", got.Title, tt.want.Title)
+					t.Errorf("ParseFileHeader() title = %v, want %v", got.Title, tt.want.Title)
 				}
 			}
 		})
