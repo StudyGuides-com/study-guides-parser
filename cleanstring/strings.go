@@ -1,43 +1,51 @@
-package utils
+package cleanstring
 
 import (
 	"strings"
 	"unicode"
 )
 
-// CleanStringer is an interface for types that can return a cleaned string representation.
-type CleanStringer interface {
-	Clean() string
-}
-
 // CleanString is a string type that implements CleanStringer.
 type CleanString string
 
+func New(s string) CleanString {
+	return CleanString(s)
+}
+
+func (s CleanString) String() string {
+	return string(s)
+}
+
 // Clean returns the cleaned version of the string.
-func (cs CleanString) Clean() string {
-	return NormalizeText(string(cs), false)
+func (s CleanString) Clean() string {
+	return normalizeText(string(s), false)
+}
+
+func (s CleanString) CleanLower() string {
+	return normalizeText(string(s), true)
+}
+
+func (s CleanString) IsEmpty() bool {
+	return strings.TrimSpace(string(s)) == ""
+}
+
+func (s CleanString) HasPrefix(prefix string) bool {
+	return strings.HasPrefix(
+		s.CleanLower(),
+		New(prefix).CleanLower(),
+	)
 }
 
 // NormalizeText performs common text normalization operations:
 // 1. Trims whitespace
 // 2. Converts to lowercase (if requested)
 // 3. Removes invisible characters
-func NormalizeText(text string, toLower bool) string {
+func normalizeText(text string, toLower bool) string {
 	trimmed := strings.TrimSpace(text)
 	if toLower {
 		trimmed = strings.ToLower(trimmed)
 	}
 	return removeInvisibleCharacters(trimmed)
-}
-
-// IsEmpty checks if a string is empty or contains only whitespace
-func IsEmpty(text string) bool {
-	return strings.TrimSpace(text) == ""
-}
-
-// HasPrefix checks if a string has a specific prefix (case-insensitive)
-func HasPrefix(text, prefix string) bool {
-	return strings.HasPrefix(strings.ToLower(strings.TrimSpace(text)), strings.ToLower(prefix))
 }
 
 // removeInvisibleCharacters removes invisible and formatting characters from the input text

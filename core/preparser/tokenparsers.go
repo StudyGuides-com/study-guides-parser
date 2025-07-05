@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/StudyGuides-com/study-guides-parser/cleanstring"
 	"github.com/StudyGuides-com/study-guides-parser/core/constants"
 	"github.com/StudyGuides-com/study-guides-parser/core/utils"
 )
@@ -30,8 +31,8 @@ func (p *QuestionParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError
 	answerText := strings.TrimSpace(parts[1])
 
 	// Sanitize both texts
-	questionText = utils.NormalizeText(questionText, false)
-	answerText = utils.NormalizeText(answerText, false)
+	questionText = cleanstring.New(questionText).Clean()
+	answerText = cleanstring.New(answerText).Clean()
 
 	return &QuestionResult{
 		QuestionText: questionText,
@@ -51,7 +52,7 @@ func (p *HeaderParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError) 
 	// Clean up each part by removing invisible characters and trimming whitespace
 	cleanedParts := make([]string, len(parts))
 	for i, part := range parts {
-		cleanedParts[i] = utils.CleanString(part).Clean()
+		cleanedParts[i] = cleanstring.New(part).Clean()
 	}
 
 	// Return the cleaned parts as a result
@@ -64,7 +65,7 @@ func (p *CommentParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError)
 		return nil, NewPreParsingError(CodeValidation, "comment must start with exactly one #", lineInfo)
 	}
 	// Remove the # and sanitize
-	text := utils.NormalizeText(strings.TrimPrefix(lineInfo.Text, constants.CommentPrefix), false)
+	text := cleanstring.New(strings.TrimPrefix(lineInfo.Text, constants.CommentPrefix)).Clean()
 	return &CommentResult{
 		Text: text,
 	}, nil
@@ -72,7 +73,7 @@ func (p *CommentParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError)
 
 // Parse implements LineParser for EmptyLineParser
 func (p *EmptyLineParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError) {
-	if !utils.IsEmpty(lineInfo.Text) {
+	if !cleanstring.New(lineInfo.Text).IsEmpty() {
 		return nil, NewPreParsingError(CodeValidation, "line must be empty or contain only whitespace", lineInfo)
 	}
 	return &EmptyLineResult{}, nil
@@ -106,7 +107,7 @@ func (p *PassageParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError)
 
 	// Get everything after "passage:"
 	rest := lineInfo.Text[passageIdx+len(constants.PassagePrefix):]
-	text := utils.CleanString(rest).Clean()
+	text := cleanstring.New(rest).Clean()
 	if text == "" {
 		return nil, NewPreParsingError(CodeValidation, "passage must contain text after 'Passage:'", lineInfo)
 	}
@@ -123,7 +124,7 @@ func (p *LearnMoreParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingErro
 	}
 	colonIdx := len(constants.LearnMorePrefix)
 	rest := lineInfo.Text[colonIdx:]
-	text := utils.CleanString(rest).Clean()
+	text := cleanstring.New(rest).Clean()
 	if text == "" {
 		return nil, NewPreParsingError(CodeValidation, "learn more line must contain text after 'Learn More:'", lineInfo)
 	}
@@ -136,7 +137,7 @@ func (p *LearnMoreParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingErro
 func (p *ContentParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError) {
 	// Content lines have no specific format requirements
 	// Just sanitize the text
-	text := utils.CleanString(lineInfo.Text).Clean()
+	text := cleanstring.New(lineInfo.Text).Clean()
 	if text == "" {
 		return nil, NewPreParsingError(CodeValidation, "content line must not be empty or whitespace only", lineInfo)
 	}

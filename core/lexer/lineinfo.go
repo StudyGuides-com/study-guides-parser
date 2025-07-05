@@ -1,6 +1,6 @@
 package lexer
 
-import "github.com/StudyGuides-com/study-guides-parser/core/utils"
+import "github.com/StudyGuides-com/study-guides-parser/cleanstring"
 
 type LineInfo struct {
 	Number int       // Line number in the file
@@ -10,5 +10,5 @@ type LineInfo struct {
 
 // Clean returns the cleaned version of the Text field.
 func (li LineInfo) Clean() string {
-	return utils.NormalizeText(li.Text, false)
+	return cleanstring.New(li.Text).Clean()
 }

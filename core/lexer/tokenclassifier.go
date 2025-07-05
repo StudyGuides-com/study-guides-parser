@@ -3,6 +3,7 @@ package lexer
 import (
 	"strings"
 
+	"github.com/StudyGuides-com/study-guides-parser/cleanstring"
 	"github.com/StudyGuides-com/study-guides-parser/core/constants"
 	"github.com/StudyGuides-com/study-guides-parser/core/utils"
 )
@@ -76,7 +77,7 @@ func isComment(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (Empty if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isEmpty(line string, lineNum int) (TokenType, *LexerError) {
-	if utils.IsEmpty(line) {
+	if cleanstring.New(line).IsEmpty() {
 		return TokenTypeEmpty, nil
 	}
 	return "", nil
@@ -95,7 +96,7 @@ func isFileHeader(line string, lineNum int) (TokenType, *LexerError) {
 		return "", nil
 	}
 	// If it's empty, that's an error
-	if utils.IsEmpty(line) {
+	if cleanstring.New(line).IsEmpty() {
 		return TokenTypeEmpty, NewLexerError(
 			CodeMissingFileHeader,
 			"first line cannot be empty",
@@ -121,9 +122,9 @@ func isFileHeader(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (Passage if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isPassage(line string, lineNum int) (TokenType, *LexerError) {
-	if utils.HasPrefix(line, constants.PassagePrefix) ||
-		utils.HasPrefix(line, "### "+constants.PassagePrefix) ||
-		utils.HasPrefix(line, "#### "+constants.PassagePrefix) {
+	if cleanstring.New(line).HasPrefix(constants.PassagePrefix) ||
+		cleanstring.New(line).HasPrefix("### "+constants.PassagePrefix) ||
+		cleanstring.New(line).HasPrefix("#### "+constants.PassagePrefix) {
 		return TokenTypePassage, nil
 	}
 	return "", nil
@@ -137,7 +138,7 @@ func isPassage(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (LearnMore if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isLearnMore(line string, lineNum int) (TokenType, *LexerError) {
-	if utils.HasPrefix(line, constants.LearnMorePrefix) {
+	if cleanstring.New(line).HasPrefix(constants.LearnMorePrefix) {
 		return TokenTypeLearnMore, nil
 	}
 	return "", nil
