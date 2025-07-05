@@ -39,20 +39,15 @@ func TestBinaryParser_Parse(t *testing.T) {
 		t.Errorf("BinaryParser.Parse() unexpected error: %v", err)
 	}
 
-	binaryResult, ok := result.(*BinaryResult)
-	if !ok {
-		t.Fatalf("BinaryParser.Parse() returned wrong type: %T", result)
-	}
-
-	if binaryResult.Text != "binary\x00content" {
-		t.Errorf("BinaryParser.Parse() returned text = %v, want %v", binaryResult.Text, "binary\x00content")
+	if result.Text != "binary\x00content" {
+		t.Errorf("BinaryParser.Parse() returned text = %v, want %v", result.Text, "binary\x00content")
 	}
 }
 
 func TestGetParserForType_UnknownType(t *testing.T) {
 	lineInfo := LineInfo{Number: 1, Text: "test", Type: "unknown_type"}
 
-	parser, err := GetParserForType("unknown_type", lineInfo)
+	parser, err := GetParserForType[*QuestionResult]("unknown_type", lineInfo)
 	if err == nil {
 		t.Error("GetParserForType() expected error for unknown type, got nil")
 	}
@@ -163,29 +158,99 @@ func TestQuestionParser_Parse_EdgeCases(t *testing.T) {
 func TestGetParserForType_AllTypes(t *testing.T) {
 	lineInfo := LineInfo{Number: 1, Text: "test", Type: TokenTypeQuestion}
 
-	testCases := []TokenType{
-		TokenTypeQuestion,
-		TokenTypeHeader,
-		TokenTypeComment,
-		TokenTypeEmpty,
-		TokenTypeFileHeader,
-		TokenTypePassage,
-		TokenTypeLearnMore,
-		TokenTypeContent,
-		TokenTypeBinary,
+	testCases := []struct {
+		tokenType TokenType
+		resultType any
+	}{
+		{TokenTypeQuestion, &QuestionResult{}},
+		{TokenTypeHeader, HeaderResult{}},
+		{TokenTypeComment, &CommentResult{}},
+		{TokenTypeEmpty, &EmptyLineResult{}},
+		{TokenTypeFileHeader, &FileHeaderResult{}},
+		{TokenTypePassage, &PassageResult{}},
+		{TokenTypeLearnMore, &LearnMoreResult{}},
+		{TokenTypeContent, &ContentResult{}},
+		{TokenTypeBinary, &BinaryResult{}},
 	}
 
-	for _, tokenType := range testCases {
-		t.Run(string(tokenType), func(t *testing.T) {
-			lineInfo.Type = tokenType
-			parser, err := GetParserForType(tokenType, lineInfo)
-
-			if err != nil {
-				t.Errorf("GetParserForType() unexpected error for %v: %v", tokenType, err)
-			}
-
-			if parser == nil {
-				t.Errorf("GetParserForType() returned nil parser for %v", tokenType)
+	for _, tc := range testCases {
+		t.Run(string(tc.tokenType), func(t *testing.T) {
+			lineInfo.Type = tc.tokenType
+			
+			// Use the appropriate type parameter based on the token type
+			switch tc.tokenType {
+			case TokenTypeQuestion:
+				parser, err := GetParserForType[*QuestionResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypeHeader:
+				parser, err := GetParserForType[HeaderResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypeComment:
+				parser, err := GetParserForType[*CommentResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypeEmpty:
+				parser, err := GetParserForType[*EmptyLineResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypeFileHeader:
+				parser, err := GetParserForType[*FileHeaderResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypePassage:
+				parser, err := GetParserForType[*PassageResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypeLearnMore:
+				parser, err := GetParserForType[*LearnMoreResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypeContent:
+				parser, err := GetParserForType[*ContentResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
+			case TokenTypeBinary:
+				parser, err := GetParserForType[*BinaryResult](tc.tokenType, lineInfo)
+				if err != nil {
+					t.Errorf("GetParserForType() unexpected error for %v: %v", tc.tokenType, err)
+				}
+				if parser == nil {
+					t.Errorf("GetParserForType() returned nil parser for %v", tc.tokenType)
+				}
 			}
 		})
 	}

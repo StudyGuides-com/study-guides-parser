@@ -20,9 +20,18 @@ const (
 	TokenTypeBinary     = lexer.TokenTypeBinary
 )
 
-type LineParser interface {
-	Parse(lineInfo LineInfo) (interface{}, *PreParsingError)
+// ParseResult represents all possible parsing result types
+type ParseResult interface {
+	*QuestionResult | HeaderResult | *CommentResult | *EmptyLineResult | 
+	*FileHeaderResult | *PassageResult | *LearnMoreResult | *ContentResult | *BinaryResult
 }
+
+type LineParser[T ParseResult] interface {
+	Parse(lineInfo LineInfo) (T, *PreParsingError)
+}
+
+// HeaderResult represents the parsed result of a header line
+type HeaderResult = []string
 
 // QuestionParser parses question lines
 type QuestionParser struct{}

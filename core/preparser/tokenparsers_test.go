@@ -94,16 +94,11 @@ func TestLineQuestionParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				qr, ok := got.(*QuestionResult)
-				if !ok {
-					t.Error("QuestionParser.Parse() did not return *QuestionResult")
-					return
+				if got.QuestionText != tt.want.QuestionText {
+					t.Errorf("QuestionParser.Parse() question = %v, want %v", got.QuestionText, tt.want.QuestionText)
 				}
-				if qr.QuestionText != tt.want.QuestionText {
-					t.Errorf("QuestionParser.Parse() question = %v, want %v", qr.QuestionText, tt.want.QuestionText)
-				}
-				if qr.AnswerText != tt.want.AnswerText {
-					t.Errorf("QuestionParser.Parse() answer = %v, want %v", qr.AnswerText, tt.want.AnswerText)
+				if got.AnswerText != tt.want.AnswerText {
+					t.Errorf("QuestionParser.Parse() answer = %v, want %v", got.AnswerText, tt.want.AnswerText)
 				}
 			}
 		})
@@ -167,16 +162,11 @@ func TestLineHeaderParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				parts, ok := got.([]string)
-				if !ok {
-					t.Error("HeaderParser.Parse() did not return []string")
+				if len(got) != len(tt.want) {
+					t.Errorf("HeaderParser.Parse() got %d parts, want %d", len(got), len(tt.want))
 					return
 				}
-				if len(parts) != len(tt.want) {
-					t.Errorf("HeaderParser.Parse() got %d parts, want %d", len(parts), len(tt.want))
-					return
-				}
-				for i, part := range parts {
+				for i, part := range got {
 					if part != tt.want[i] {
 						t.Errorf("HeaderParser.Parse() part[%d] = %v, want %v", i, part, tt.want[i])
 					}
@@ -246,13 +236,8 @@ func TestLineCommentParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				cr, ok := got.(*CommentResult)
-				if !ok {
-					t.Error("CommentParser.Parse() did not return *CommentResult")
-					return
-				}
-				if cr.Text != tt.want.Text {
-					t.Errorf("CommentParser.Parse() text = %v, want %v", cr.Text, tt.want.Text)
+				if got.Text != tt.want.Text {
+					t.Errorf("CommentParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -331,13 +316,8 @@ func TestLinePassageParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				pr, ok := got.(*PassageResult)
-				if !ok {
-					t.Error("PassageParser.Parse() did not return *PassageResult")
-					return
-				}
-				if pr.Text != tt.want.Text {
-					t.Errorf("PassageParser.Parse() text = %v, want %v", pr.Text, tt.want.Text)
+				if got.Text != tt.want.Text {
+					t.Errorf("PassageParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -416,13 +396,8 @@ func TestLineLearnMoreParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				lmr, ok := got.(*LearnMoreResult)
-				if !ok {
-					t.Error("LearnMoreParser.Parse() did not return *LearnMoreResult")
-					return
-				}
-				if lmr.Text != tt.want.Text {
-					t.Errorf("LearnMoreParser.Parse() text = %v, want %v", lmr.Text, tt.want.Text)
+				if got.Text != tt.want.Text {
+					t.Errorf("LearnMoreParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -489,13 +464,8 @@ func TestLineContentParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				cr, ok := got.(*ContentResult)
-				if !ok {
-					t.Error("ContentParser.Parse() did not return *ContentResult")
-					return
-				}
-				if cr.Text != tt.want.Text {
-					t.Errorf("ContentParser.Parse() text = %v, want %v", cr.Text, tt.want.Text)
+				if got.Text != tt.want.Text {
+					t.Errorf("ContentParser.Parse() text = %v, want %v", got.Text, tt.want.Text)
 				}
 			}
 		})
@@ -546,9 +516,9 @@ func TestLineEmptyLineParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				_, ok := got.(*EmptyLineResult)
-				if !ok {
-					t.Error("EmptyLineParser.Parse() did not return *EmptyLineResult")
+				// EmptyLineResult has no fields to check, just verify it's not nil
+				if got == nil {
+					t.Error("EmptyLineParser.Parse() returned nil result")
 				}
 			}
 		})
@@ -627,13 +597,8 @@ func TestLineFileHeaderParser(t *testing.T) {
 				return
 			}
 			if !tt.wantErr {
-				fhr, ok := got.(*FileHeaderResult)
-				if !ok {
-					t.Error("FileHeaderParser.Parse() did not return *FileHeaderResult")
-					return
-				}
-				if fhr.Title != tt.want.Title {
-					t.Errorf("FileHeaderParser.Parse() title = %v, want %v", fhr.Title, tt.want.Title)
+				if got.Title != tt.want.Title {
+					t.Errorf("FileHeaderParser.Parse() title = %v, want %v", got.Title, tt.want.Title)
 				}
 			}
 		})

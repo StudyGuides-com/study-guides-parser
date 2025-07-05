@@ -165,13 +165,100 @@ func TestGetParserForType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			lineInfo := LineInfo{Type: tt.lineType}
-			parser, err := GetParserForType(tt.lineType, lineInfo)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !tt.wantErr && parser == nil {
-				t.Error("GetParserForType() returned nil parser for valid type")
+			
+			// Use the appropriate type parameter based on the token type
+			switch tt.lineType {
+			case TokenTypeQuestion:
+				parser, err := GetParserForType[*QuestionResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypeHeader:
+				parser, err := GetParserForType[HeaderResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypeComment:
+				parser, err := GetParserForType[*CommentResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypeEmpty:
+				parser, err := GetParserForType[*EmptyLineResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypeFileHeader:
+				parser, err := GetParserForType[*FileHeaderResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypePassage:
+				parser, err := GetParserForType[*PassageResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypeLearnMore:
+				parser, err := GetParserForType[*LearnMoreResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypeContent:
+				parser, err := GetParserForType[*ContentResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			case TokenTypeBinary:
+				parser, err := GetParserForType[*BinaryResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
+			default:
+				// For invalid types, test with any result type
+				parser, err := GetParserForType[*QuestionResult](tt.lineType, lineInfo)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("GetParserForType() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if !tt.wantErr && parser == nil {
+					t.Error("GetParserForType() returned nil parser for valid type")
+				}
 			}
 		})
 	}
