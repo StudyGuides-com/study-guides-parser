@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"strings"
+	"github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
 )
 
 // Lexer provides functionality to process individual lines of text, detecting their type and
@@ -55,7 +55,7 @@ func NewLexer() *Lexer {
 //   - LineInfo: Information about the processed line
 //   - *LexerError: Any error that occurred during processing
 func (l *Lexer) ProcessLine(line string, lineNum int) (LineInfo, *LexerError) {
-	trimmed := strings.TrimSpace(line)
+	cleaned := cleanstring.New(line).Clean()
 	lineInfo := LineInfo{
 		Number: lineNum,
 		Text:   line,
@@ -65,7 +65,7 @@ func (l *Lexer) ProcessLine(line string, lineNum int) (LineInfo, *LexerError) {
 	var tokenType TokenType
 	var classifierErr *LexerError
 	for _, classify := range l.classifiers {
-		tokenType, classifierErr = classify(trimmed, lineNum)
+		tokenType, classifierErr = classify(cleaned, lineNum)
 		if tokenType != "" {
 			lineInfo.Type = tokenType
 			break

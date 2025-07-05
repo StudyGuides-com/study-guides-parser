@@ -1,0 +1,28 @@
+AWS Certified Developer - Associate (DVA-C02)
+
+Certifications: Amazon Web Services (AWS): AWS Certified Developer - Associate (DVA-C02): Development with AWS Services: Architectural Patterns in AWS Application Development
+
+1. Why are architectural patterns essential in Amazon Web Services development? - Ensure scalability and resilience
+2. What do architectural patterns provide for Amazon Web Services infrastructure? - Tried-and-tested structural solutions
+3. What is the key benefit of using architectural patterns in cloud operations? - Handling varying workloads efficiently
+4. How do architectural patterns help with service integration? - Facilitate multiple service integration
+5. What architecture pattern is characterized by responding to events? - Event-Driven Architecture
+6. How do components communicate in an event-driven architecture? - By producing and responding to events
+7. What type of model does event-driven architecture use? - Asynchronous communication model
+8. Which Amazon Web Services service is often triggered in event-driven architecture? - Amazon Web Services Lambda
+9. What can trigger an Amazon Web Services Lambda function in event-driven architecture? - File upload to Amazon Simple Storage Service
+10. Name one common use case for event-driven architecture. - Real-time data processing
+
+
+Certifications: Amazon Web Services (AWS): AWS Certified Developer - Associate (DVA-C02): Development with AWS Services: Idempotency and Data Management in AWS Development
+
+1. What is idempotency in software development? - Same outcome despite repetitions
+2. Why is idempotency crucial in cloud environments? - Ensures reliable, consistent operations
+3. What does idempotency prevent in Amazon Web Services applications? - Data inconsistencies, duplicate operations
+4. What can cause repeated executions of operations in cloud environments? - Network instability, service interruptions
+5. What is an example of idempotency in payment processing? - Preventing double billing
+6. Why is idempotency important for Amazon Web Services applications? - Enhances reliability and resilience
+7. How does idempotency contribute to fault tolerance? - Prevents undesired repeated outcomes
+8. What does idempotency ensure in data management? - Consistent data across the system
+9. How does idempotency simplify error handling? - Ensures repeated operations' same state
+10. Which Amazon Web Services messaging service delivers messages at least once? - Amazon Simple Queue Service

@@ -1,6 +1,6 @@
 package lexer
 
-import "github.com/StudyGuides-com/study-guides-parser/cleanstring"
+import "github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
 
 type LineInfo struct {
 	Number int       // Line number in the file

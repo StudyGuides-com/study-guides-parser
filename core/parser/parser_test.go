@@ -233,3 +233,57 @@ func TestParser(t *testing.T) {
 		})
 	}
 }
+
+func TestAddUnderCurrent_Errors(t *testing.T) {
+	p := &Parser{}
+	line := preparser.ParsedLineInfo{Type: lexer.TokenTypeContent}
+	err := p.addUnderCurrent(lexer.TokenTypePassage, line)
+	if err == nil {
+		t.Error("addUnderCurrent should error if Current is nil")
+	}
+
+	p.Current = &Node{Type: lexer.TokenTypeHeader}
+	err = p.addUnderCurrent(lexer.TokenTypePassage, line)
+	if err == nil {
+		t.Error("addUnderCurrent should error if Current is wrong type")
+	}
+}
+
+func TestAddUnderCurrent_Success(t *testing.T) {
+	p := &Parser{Current: &Node{Type: lexer.TokenTypePassage}}
+	line := preparser.ParsedLineInfo{Type: lexer.TokenTypeContent}
+	err := p.addUnderCurrent(lexer.TokenTypePassage, line)
+	if err != nil {
+		t.Errorf("addUnderCurrent should not error, got %v", err)
+	}
+	if len(p.Current.Children) != 1 {
+		t.Error("addUnderCurrent should add a child node")
+	}
+}
+
+func TestFindNearest(t *testing.T) {
+	root := &Node{Type: lexer.TokenTypeFileHeader}
+	header := &Node{Type: lexer.TokenTypeHeader, Parent: root}
+	passage := &Node{Type: lexer.TokenTypePassage, Parent: header}
+	p := &Parser{Current: passage}
+	if got := p.findNearest(lexer.TokenTypeHeader); got != header {
+		t.Errorf("findNearest(header) = %v, want %v", got, header)
+	}
+	if got := p.findNearest(lexer.TokenTypeFileHeader); got != root {
+		t.Errorf("findNearest(root) = %v, want %v", got, root)
+	}
+	if got := p.findNearest(lexer.TokenTypeQuestion); got != nil {
+		t.Errorf("findNearest(question) = %v, want nil", got)
+	}
+}
+
+func TestFinalize_NoRoot(t *testing.T) {
+	p := &Parser{}
+	ast, err := p.finalize()
+	if err == nil {
+		t.Error("finalize should error if Root is nil")
+	}
+	if ast != nil {
+		t.Error("finalize should return nil AST if Root is nil")
+	}
+}

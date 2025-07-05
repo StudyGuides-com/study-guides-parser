@@ -3,16 +3,16 @@ package preparser
 import (
 	"strings"
 
-	"github.com/StudyGuides-com/study-guides-parser/cleanstring"
+	"github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
 	"github.com/StudyGuides-com/study-guides-parser/core/constants"
-	"github.com/StudyGuides-com/study-guides-parser/core/utils"
+	"github.com/StudyGuides-com/study-guides-parser/core/regexes"
 )
 
 // ParseQuestion parses question lines
 func ParseQuestion(lineInfo LineInfo) (*QuestionResult, *PreParsingError) {
-	// Trim leading spaces before checking for prefix
-	trimmedLine := strings.TrimLeft(lineInfo.Text, " ")
-	if !utils.ListItemPrefixRegex.MatchString(trimmedLine) {
+	// Use cleanstring for consistent text normalization
+	cleanedLine := cleanstring.New(lineInfo.Text).Clean()
+	if !regexes.ListItemPrefixRegex.MatchString(cleanedLine) {
 		return nil, NewPreParsingError(CodeValidation, "question must start with a number or bullet point", lineInfo)
 	}
 	if !strings.Contains(lineInfo.Text, constants.AnswerDelimiter) {
@@ -25,9 +25,9 @@ func ParseQuestion(lineInfo LineInfo) (*QuestionResult, *PreParsingError) {
 		return nil, NewPreParsingError(CodeValidation, "invalid question format", lineInfo)
 	}
 
-	// Remove the prefix from the question
-	questionText := strings.TrimSpace(utils.ListItemPrefixRegex.ReplaceAllString(parts[0], ""))
-	answerText := strings.TrimSpace(parts[1])
+	// Remove the prefix from the question using cleaned text
+	questionText := cleanstring.New(regexes.ListItemPrefixRegex.ReplaceAllString(parts[0], "")).Clean()
+	answerText := cleanstring.New(parts[1]).Clean()
 
 	// Sanitize both texts
 	questionText = cleanstring.New(questionText).Clean()

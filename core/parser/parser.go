@@ -24,7 +24,10 @@ func NewParser(parserType ParserType, lines []preparser.ParsedLineInfo) *Parser 
 
 // Helper to add node under current node if current is of expected type
 func (p *Parser) addUnderCurrent(expected lexer.TokenType, line preparser.ParsedLineInfo) *ParserError {
-	if p.Current == nil || p.Current.Type != expected {
+	if p.Current == nil {
+		return NewParserError(CodeValidation, fmt.Sprintf(" unexpected %s under <nil>", line.Type), line)
+	}
+	if p.Current.Type != expected {
 		return NewParserError(CodeValidation, fmt.Sprintf(" unexpected %s under %s", line.Type, p.Current.Type), line)
 	}
 	node := &Node{

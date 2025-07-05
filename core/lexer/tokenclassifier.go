@@ -3,9 +3,9 @@ package lexer
 import (
 	"strings"
 
-	"github.com/StudyGuides-com/study-guides-parser/cleanstring"
+	"github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
 	"github.com/StudyGuides-com/study-guides-parser/core/constants"
-	"github.com/StudyGuides-com/study-guides-parser/core/utils"
+	"github.com/StudyGuides-com/study-guides-parser/core/regexes"
 )
 
 type TokenClassifier func(string, int) (TokenType, *LexerError)
@@ -19,7 +19,9 @@ type TokenClassifier func(string, int) (TokenType, *LexerError)
 //   - TokenType: The type of line (Question if valid, empty string if not)
 //   - *TokenizerError: Any validation errors found
 func isQuestion(line string, lineNum int) (TokenType, *LexerError) {
-	if !utils.ListItemPrefixRegex.MatchString(line) {
+	// Use cleanstring for consistent text normalization
+	cleanedLine := cleanstring.New(line).Clean()
+	if !regexes.ListItemPrefixRegex.MatchString(cleanedLine) {
 		return "", nil
 	}
 	if !strings.Contains(line, constants.AnswerDelimiter) {
@@ -64,8 +66,8 @@ func isHeader(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (Comment if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isComment(line string, lineNum int) (TokenType, *LexerError) {
-	trimmed := strings.TrimSpace(line)
-	if strings.HasPrefix(trimmed, constants.CommentPrefix) && !strings.HasPrefix(trimmed, constants.CommentDoublePrefix) {
+	cleaned := cleanstring.New(line).Clean()
+	if strings.HasPrefix(cleaned, constants.CommentPrefix) && !strings.HasPrefix(cleaned, constants.CommentDoublePrefix) {
 		return TokenTypeComment, nil
 	}
 	return "", nil
