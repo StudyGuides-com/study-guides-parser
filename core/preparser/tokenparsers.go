@@ -153,16 +153,3 @@ func ParseBinary(lineInfo LineInfo) (*BinaryResult, *PreParsingError) {
 		Text: lineInfo.Text,
 	}, nil
 }
-
-// parserRegistry maps token types to their corresponding parser functions
-var parserRegistry = map[TokenType]any{
-	TokenTypeQuestion:   ParserFunc[*QuestionResult](ParseQuestion),
-	TokenTypeHeader:     ParserFunc[*HeaderResult](ParseHeader),
-	TokenTypeComment:    ParserFunc[*CommentResult](ParseComment),
-	TokenTypeEmpty:      ParserFunc[*EmptyLineResult](ParseEmptyLine),
-	TokenTypeFileHeader: ParserFunc[*FileHeaderResult](ParseFileHeader),
-	TokenTypePassage:    ParserFunc[*PassageResult](ParsePassage),
-	TokenTypeLearnMore:  ParserFunc[*LearnMoreResult](ParseLearnMore),
-	TokenTypeContent:    ParserFunc[*ContentResult](ParseContent),
-	TokenTypeBinary:     ParserFunc[*BinaryResult](ParseBinary),
-}

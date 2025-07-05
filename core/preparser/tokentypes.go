@@ -20,24 +20,6 @@ const (
 	TokenTypeBinary     = lexer.TokenTypeBinary
 )
 
-// ParseResult represents all possible parsing result types
-type ParseResult interface {
-	*QuestionResult | *HeaderResult | *CommentResult | *EmptyLineResult | 
-	*FileHeaderResult | *PassageResult | *LearnMoreResult | *ContentResult | *BinaryResult
-}
-
-// ParserFunc is a function type that implements LineParser
-type ParserFunc[T ParseResult] func(LineInfo) (T, *PreParsingError)
-
-// Parse implements LineParser for ParserFunc
-func (f ParserFunc[T]) Parse(lineInfo LineInfo) (T, *PreParsingError) {
-	return f(lineInfo)
-}
-
-type LineParser[T ParseResult] interface {
-	Parse(lineInfo LineInfo) (T, *PreParsingError)
-}
-
 // HeaderResult represents the parsed result of a header line
 type HeaderResult struct {
 	Parts []string

@@ -596,3 +596,112 @@ func TestLineFileHeaderParser(t *testing.T) {
 		})
 	}
 }
+
+func TestLineBinaryParser(t *testing.T) {
+	tests := []struct {
+		name     string
+		lineInfo LineInfo
+		want     *BinaryResult
+		wantErr  bool
+	}{
+		{
+			name: "valid binary data with null bytes",
+			lineInfo: LineInfo{
+				Number: 1,
+				Type:   TokenTypeBinary,
+				Text:   "binary data \x00\x01\x02\x03",
+			},
+			want: &BinaryResult{
+				Text: "binary data \x00\x01\x02\x03",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid binary data with control characters",
+			lineInfo: LineInfo{
+				Number: 1,
+				Type:   TokenTypeBinary,
+				Text:   "text with \t\n\r control chars",
+			},
+			want: &BinaryResult{
+				Text: "text with \t\n\r control chars",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid binary data with unicode",
+			lineInfo: LineInfo{
+				Number: 1,
+				Type:   TokenTypeBinary,
+				Text:   "text with unicode: 你好世界",
+			},
+			want: &BinaryResult{
+				Text: "text with unicode: 你好世界",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid binary data with emoji",
+			lineInfo: LineInfo{
+				Number: 1,
+				Type:   TokenTypeBinary,
+				Text:   "text with emoji: 🚀💻🎯",
+			},
+			want: &BinaryResult{
+				Text: "text with emoji: 🚀💻🎯",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid binary data with special characters",
+			lineInfo: LineInfo{
+				Number: 1,
+				Type:   TokenTypeBinary,
+				Text:   "text with special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?",
+			},
+			want: &BinaryResult{
+				Text: "text with special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid binary data with empty string",
+			lineInfo: LineInfo{
+				Number: 1,
+				Type:   TokenTypeBinary,
+				Text:   "",
+			},
+			want: &BinaryResult{
+				Text: "",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid binary data with whitespace only",
+			lineInfo: LineInfo{
+				Number: 1,
+				Type:   TokenTypeBinary,
+				Text:   "   \t\n\r   ",
+			},
+			want: &BinaryResult{
+				Text: "   \t\n\r   ",
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseBinary(tt.lineInfo)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseBinary() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr {
+				if got.Text != tt.want.Text {
+					t.Errorf("ParseBinary() text = %v, want %v", got.Text, tt.want.Text)
+				}
+			}
+		})
+	}
+}
