@@ -5,6 +5,19 @@ import (
 	"unicode"
 )
 
+// CleanStringer is an interface for types that can return a cleaned string representation.
+type CleanStringer interface {
+	Clean() string
+}
+
+// CleanString is a string type that implements CleanStringer.
+type CleanString string
+
+// Clean returns the cleaned version of the string.
+func (cs CleanString) Clean() string {
+	return NormalizeText(string(cs), false)
+}
+
 // NormalizeText performs common text normalization operations:
 // 1. Trims whitespace
 // 2. Converts to lowercase (if requested)
@@ -14,7 +27,7 @@ func NormalizeText(text string, toLower bool) string {
 	if toLower {
 		trimmed = strings.ToLower(trimmed)
 	}
-	return RemoveInvisibleCharacters(trimmed)
+	return removeInvisibleCharacters(trimmed)
 }
 
 // IsEmpty checks if a string is empty or contains only whitespace
@@ -27,9 +40,9 @@ func HasPrefix(text, prefix string) bool {
 	return strings.HasPrefix(strings.ToLower(strings.TrimSpace(text)), strings.ToLower(prefix))
 }
 
-// RemoveInvisibleCharacters removes invisible and formatting characters from the input text
+// removeInvisibleCharacters removes invisible and formatting characters from the input text
 // while preserving regular spaces and visible characters.
-func RemoveInvisibleCharacters(text string) string {
+func removeInvisibleCharacters(text string) string {
 	var result []rune
 	for _, char := range text {
 		// Keep regular spaces and visible characters
@@ -38,4 +51,4 @@ func RemoveInvisibleCharacters(text string) string {
 		}
 	}
 	return string(result)
-} 
+}

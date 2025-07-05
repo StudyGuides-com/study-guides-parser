@@ -210,22 +210,22 @@ func TestParser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			parser := NewParser(tt.parserType, tt.lines)
 			result, err := parser.Parse()
-			
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parser.Parse() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			
+
 			if !tt.wantErr {
 				if result == nil {
 					t.Error("Parser.Parse() returned nil result when no error expected")
 					return
 				}
-				
+
 				if result.ParserType != tt.parserType {
 					t.Errorf("Parser.Parse() returned parser type = %v, want %v", result.ParserType, tt.parserType)
 				}
-				
+
 				if result.Root == nil {
 					t.Error("Parser.Parse() returned nil root node")
 				}

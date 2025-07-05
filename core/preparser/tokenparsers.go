@@ -30,8 +30,8 @@ func (p *QuestionParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError
 	answerText := strings.TrimSpace(parts[1])
 
 	// Sanitize both texts
-	questionText = utils.RemoveInvisibleCharacters(questionText)
-	answerText = utils.RemoveInvisibleCharacters(answerText)
+	questionText = utils.NormalizeText(questionText, false)
+	answerText = utils.NormalizeText(answerText, false)
 
 	return &QuestionResult{
 		QuestionText: questionText,
@@ -42,7 +42,7 @@ func (p *QuestionParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError
 // Parse implements LineParser for HeaderParser
 func (p *HeaderParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError) {
 	// Split the line by the colon ":" character
-	parts := strings.Split(lineInfo.Text, constants.ColonDelimiter)
+	parts := strings.Split(lineInfo.Clean(), constants.ColonDelimiter)
 
 	if len(parts) < constants.MinHeaderParts {
 		return nil, NewPreParsingError(CodeValidation, "header must contain at least two colons", lineInfo)
@@ -51,7 +51,7 @@ func (p *HeaderParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError) 
 	// Clean up each part by removing invisible characters and trimming whitespace
 	cleanedParts := make([]string, len(parts))
 	for i, part := range parts {
-		cleanedParts[i] = utils.RemoveInvisibleCharacters(strings.TrimSpace(part))
+		cleanedParts[i] = utils.CleanString(part).Clean()
 	}
 
 	// Return the cleaned parts as a result
@@ -64,7 +64,7 @@ func (p *CommentParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError)
 		return nil, NewPreParsingError(CodeValidation, "comment must start with exactly one #", lineInfo)
 	}
 	// Remove the # and sanitize
-	text := utils.RemoveInvisibleCharacters(strings.TrimSpace(strings.TrimPrefix(lineInfo.Text, constants.CommentPrefix)))
+	text := utils.NormalizeText(strings.TrimPrefix(lineInfo.Text, constants.CommentPrefix), false)
 	return &CommentResult{
 		Text: text,
 	}, nil
@@ -88,7 +88,7 @@ func (p *FileHeaderParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingErr
 		return nil, NewPreParsingError(CodeValidation, "file header should not be a regular header", lineInfo)
 	}
 	// Sanitize the title
-	title := utils.RemoveInvisibleCharacters(strings.TrimSpace(lineInfo.Text))
+	title := lineInfo.Clean()
 	return &FileHeaderResult{
 		Title: title,
 	}, nil
@@ -106,7 +106,7 @@ func (p *PassageParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError)
 
 	// Get everything after "passage:"
 	rest := lineInfo.Text[passageIdx+len(constants.PassagePrefix):]
-	text := utils.RemoveInvisibleCharacters(strings.TrimSpace(rest))
+	text := utils.CleanString(rest).Clean()
 	if text == "" {
 		return nil, NewPreParsingError(CodeValidation, "passage must contain text after 'Passage:'", lineInfo)
 	}
@@ -123,7 +123,7 @@ func (p *LearnMoreParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingErro
 	}
 	colonIdx := len(constants.LearnMorePrefix)
 	rest := lineInfo.Text[colonIdx:]
-	text := utils.RemoveInvisibleCharacters(strings.TrimSpace(rest))
+	text := utils.CleanString(rest).Clean()
 	if text == "" {
 		return nil, NewPreParsingError(CodeValidation, "learn more line must contain text after 'Learn More:'", lineInfo)
 	}
@@ -136,7 +136,7 @@ func (p *LearnMoreParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingErro
 func (p *ContentParser) Parse(lineInfo LineInfo) (interface{}, *PreParsingError) {
 	// Content lines have no specific format requirements
 	// Just sanitize the text
-	text := utils.RemoveInvisibleCharacters(strings.TrimSpace(lineInfo.Text))
+	text := utils.CleanString(lineInfo.Text).Clean()
 	if text == "" {
 		return nil, NewPreParsingError(CodeValidation, "content line must not be empty or whitespace only", lineInfo)
 	}
