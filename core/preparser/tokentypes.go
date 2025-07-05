@@ -21,7 +21,7 @@ const (
 )
 
 type LineParser interface {
-	Parse(lineInfo LineInfo) (interface{}, error)
+	Parse(lineInfo LineInfo) (interface{}, *PreParsingError)
 }
 
 // QuestionParser parses question lines

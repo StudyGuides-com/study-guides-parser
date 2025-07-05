@@ -1,13 +1,11 @@
 package lexer
 
 import (
-	"regexp"
 	"strings"
-)
 
-// listItemPrefixRegex is a compiled regular expression that matches list item prefixes
-// in the format of numbered items (e.g., "1.") or bullet points (e.g., "*" or "-")
-var listItemPrefixRegex = regexp.MustCompile(`^(\d+\.|\*|\-)\s+`)
+	"github.com/StudyGuides-com/study-guides-parser/core/constants"
+	"github.com/StudyGuides-com/study-guides-parser/core/utils"
+)
 
 type TokenClassifier func(string, int) (TokenType, *LexerError)
 
@@ -20,10 +18,10 @@ type TokenClassifier func(string, int) (TokenType, *LexerError)
 //   - TokenType: The type of line (Question if valid, empty string if not)
 //   - *TokenizerError: Any validation errors found
 func isQuestion(line string, lineNum int) (TokenType, *LexerError) {
-	if !listItemPrefixRegex.MatchString(line) {
+	if !utils.ListItemPrefixRegex.MatchString(line) {
 		return "", nil
 	}
-	if !strings.Contains(line, " - ") {
+	if !strings.Contains(line, constants.AnswerDelimiter) {
 		return TokenTypeQuestion, NewLexerError(
 			CodeMissingAnswerDelimiter,
 			"missing answer delimiter ' - '",
@@ -50,8 +48,8 @@ func isHeader(line string, lineNum int) (TokenType, *LexerError) {
 	if lineType, _ := isLearnMore(line, lineNum); lineType != "" {
 		return "", nil
 	}
-	parts := strings.Split(line, ":")
-	if len(parts) >= 3 {
+	parts := strings.Split(line, constants.ColonDelimiter)
+	if len(parts) >= constants.MinHeaderParts {
 		return TokenTypeHeader, nil
 	}
 	return "", nil
@@ -66,7 +64,7 @@ func isHeader(line string, lineNum int) (TokenType, *LexerError) {
 //   - *LexerError: Any validation errors found
 func isComment(line string, lineNum int) (TokenType, *LexerError) {
 	trimmed := strings.TrimSpace(line)
-	if strings.HasPrefix(trimmed, "#") && !strings.HasPrefix(trimmed, "##") {
+	if strings.HasPrefix(trimmed, constants.CommentPrefix) && !strings.HasPrefix(trimmed, constants.CommentDoublePrefix) {
 		return TokenTypeComment, nil
 	}
 	return "", nil
@@ -78,7 +76,7 @@ func isComment(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (Empty if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isEmpty(line string, lineNum int) (TokenType, *LexerError) {
-	if strings.TrimSpace(line) == "" {
+	if utils.IsEmpty(line) {
 		return TokenTypeEmpty, nil
 	}
 	return "", nil
@@ -93,11 +91,11 @@ func isEmpty(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (FileHeader if valid, empty string if not)
 //   - *LexerError: Error if line 1 is not a file header, nil otherwise
 func isFileHeader(line string, lineNum int) (TokenType, *LexerError) {
-	if lineNum != 1 {
+	if lineNum != constants.FirstLineNumber {
 		return "", nil
 	}
 	// If it's empty, that's an error
-	if strings.TrimSpace(line) == "" {
+	if utils.IsEmpty(line) {
 		return TokenTypeEmpty, NewLexerError(
 			CodeMissingFileHeader,
 			"first line cannot be empty",
@@ -123,11 +121,9 @@ func isFileHeader(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (Passage if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isPassage(line string, lineNum int) (TokenType, *LexerError) {
-	trimmed := strings.TrimSpace(line)
-	lower := strings.ToLower(trimmed)
-	if strings.HasPrefix(lower, "passage:") ||
-		strings.HasPrefix(lower, "### passage:") ||
-		strings.HasPrefix(lower, "#### passage:") {
+	if utils.HasPrefix(line, constants.PassagePrefix) ||
+		utils.HasPrefix(line, "### "+constants.PassagePrefix) ||
+		utils.HasPrefix(line, "#### "+constants.PassagePrefix) {
 		return TokenTypePassage, nil
 	}
 	return "", nil
@@ -141,9 +137,7 @@ func isPassage(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (LearnMore if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isLearnMore(line string, lineNum int) (TokenType, *LexerError) {
-	trimmed := strings.TrimSpace(line)
-	lower := strings.ToLower(trimmed)
-	if strings.HasPrefix(lower, "learn more:") {
+	if utils.HasPrefix(line, constants.LearnMorePrefix) {
 		return TokenTypeLearnMore, nil
 	}
 	return "", nil

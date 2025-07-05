@@ -26,7 +26,8 @@ func (e *LexerError) Error() string {
 	return e.Message
 }
 
-// NewParsingError creates a new parsing error
+// NewLexerError creates a new lexer error with the given code, message, and line information.
+// This function is used to create consistent error instances throughout the lexer package.
 func NewLexerError(code ErrorCode, message string, lineInfo LineInfo) *LexerError {
 	return &LexerError{
 		Message:  message,

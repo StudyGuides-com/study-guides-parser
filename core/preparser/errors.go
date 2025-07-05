@@ -21,7 +21,8 @@ func (e *PreParsingError) Error() string {
 	return e.Message
 }
 
-// NewParsingError creates a new parsing error
+// NewPreParsingError creates a new parsing error with the given code, message, and line information.
+// This function is used to create consistent error instances throughout the preparser package.
 func NewPreParsingError(code ErrorCode, message string, lineInfo LineInfo) *PreParsingError {
 	return &PreParsingError{
 		Message:  message,
@@ -37,6 +38,8 @@ type GeneralError struct {
 	Code     ErrorCode
 }
 
+// NewGeneralError creates a new general error with the given code and message.
+// This function is used for errors that are not specific to a particular line.
 func NewGeneralError(code ErrorCode, message string) *GeneralError {
 	return &GeneralError{
 		Message:  message,

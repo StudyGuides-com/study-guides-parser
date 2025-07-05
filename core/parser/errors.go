@@ -27,7 +27,8 @@ func (e *ParserError) Error() string {
 	return fmt.Sprintf("%s (line: %d, text: %s)", e.Message, e.LineInfo.Number, e.LineInfo.Text)
 }
 
-// NewParserError creates a new parsing error
+// NewParserError creates a new parser error with the given code, message, and line information.
+// This function is used to create consistent error instances throughout the parser package.
 func NewParserError(code ErrorCode, message string, lineInfo preparser.ParsedLineInfo) *ParserError {
 	return &ParserError{
 		Message:  message,
@@ -43,6 +44,8 @@ type GeneralError struct {
 	Code     ErrorCode
 }
 
+// NewGeneralError creates a new general error with the given code and message.
+// This function is used for errors that are not specific to a particular line.
 func NewGeneralError(code ErrorCode, message string) *GeneralError {
 	return &GeneralError{
 		Message:  message,
