@@ -40,17 +40,17 @@ func (m *Metadata) WithOption(key, value string) *Metadata {
 }
 
 type LexerOutput struct {
-	Filename string
-	Tokens   []lexer.LineInfo
-	Errors   []error
-	Success  bool
+	Filename string        `json:"filename"`
+	Tokens   []lexer.LineInfo `json:"tokens"`
+	Errors   []string      `json:"errors"`
+	Success  bool          `json:"success"`
 }
 
 type PreparserOutput struct {
-	Filename string
-	Tokens   []preparser.ParsedLineInfo
-	Errors   []error
-	Success  bool
+	Filename string                      `json:"filename"`
+	Tokens   []preparser.ParsedLineInfo `json:"tokens"`
+	Errors   []string                   `json:"errors"`
+	Success  bool                       `json:"success"`
 }
 
 // ParseFile reads a file and parses it into an Abstract Syntax Tree
@@ -94,9 +94,15 @@ func Lex(lines []string) (LexerOutput, error) {
 		tokens = append(tokens, lineInfo)
 	}
 
+	// Convert errors to strings for JSON serialization
+	errorStrings := make([]string, len(errors))
+	for i, err := range errors {
+		errorStrings[i] = err.Error()
+	}
+
 	return LexerOutput{
 		Tokens:  tokens,
-		Errors:  errors,
+		Errors:  errorStrings,
 		Success: len(errors) == 0,
 	}, nil
 }
@@ -104,8 +110,12 @@ func Lex(lines []string) (LexerOutput, error) {
 func Preparse(lines []string) (PreparserOutput, error) {
 	lexOut, err := Lex(lines)
 	if err != nil || !lexOut.Success {
+		var errorStrings []string
+		if err != nil {
+			errorStrings = append(errorStrings, err.Error())
+		}
 		return PreparserOutput{
-			Errors:  append([]error{}, err),
+			Errors:  errorStrings,
 			Success: false,
 		}, err
 	}
@@ -116,9 +126,16 @@ func Preparse(lines []string) (PreparserOutput, error) {
 	if prepErr != nil {
 		errors = append(errors, prepErr)
 	}
+	
+	// Convert errors to strings for JSON serialization
+	errorStrings := make([]string, len(errors))
+	for i, err := range errors {
+		errorStrings[i] = err.Error()
+	}
+	
 	return PreparserOutput{
 		Tokens:  parsed,
-		Errors:  errors,
+		Errors:  errorStrings,
 		Success: len(errors) == 0,
 	}, nil
 }
