@@ -21,7 +21,8 @@ func main() {
 	}
 
 	fmt.Println("=== Example 1: Parse from strings ===")
-	ast, err := processor.ParseLines(lines, processor.Colleges)
+	metadata := processor.NewMetadata(processor.Colleges)
+	ast, err := processor.Parse(lines, metadata)
 	if err != nil {
 		log.Fatal("Error parsing lines:", err)
 	}
@@ -33,7 +34,7 @@ func main() {
 	// Example 2: Parse from file
 	fmt.Println("\n=== Example 2: Parse from file ===")
 	// This would work with an actual file
-	// ast, err = processor.ParseFile("study_guide.txt", processor.Colleges)
+	// ast, err = processor.ParseFile("study_guide.txt", processor.NewMetadata(processor.Colleges))
 	// if err != nil {
 	//     log.Fatal("Error parsing file:", err)
 	// }
@@ -48,7 +49,8 @@ func main() {
 		"2. How do you find the derivative of x²? - Use the power rule: 2x.",
 	}
 
-	ast, err = processor.ParseLines(apLines, processor.APExams)
+	apMetadata := processor.NewMetadata(processor.APExams)
+	ast, err = processor.Parse(apLines, apMetadata)
 	if err != nil {
 		log.Fatal("Error parsing AP exam:", err)
 	}
@@ -58,14 +60,24 @@ func main() {
 	fmt.Printf("Root Type: %s\n", ast.Root.Type)
 	fmt.Printf("Number of children: %d\n", len(ast.Root.Children))
 
-	// Example 4: Error handling
-	fmt.Println("\n=== Example 4: Error handling ===")
+	// Example 4: Advanced usage with options
+	fmt.Println("\n=== Example 4: Advanced usage with options ===")
+	advancedMetadata := processor.NewMetadata(processor.Colleges).
+		WithOption("strict", "true").
+		WithOption("debug", "false").
+		WithOption("version", "1.0")
+
+	fmt.Printf("Parser Type: %s\n", advancedMetadata.ParserType)
+	fmt.Printf("Options: %+v\n", advancedMetadata.Options)
+
+	// Example 5: Error handling
+	fmt.Println("\n=== Example 5: Error handling ===")
 	invalidLines := []string{
 		"Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations",
 		"1. What is x? - A variable",
 	}
 
-	_, err = processor.ParseLines(invalidLines, processor.Colleges)
+	_, err = processor.Parse(invalidLines, processor.NewMetadata(processor.Colleges))
 	if err != nil {
 		fmt.Printf("Expected error: %v\n", err)
 	}
@@ -76,4 +88,5 @@ func main() {
 	fmt.Println("✅ No more manual pipeline management")
 	fmt.Println("✅ No more token format conversions")
 	fmt.Println("✅ All existing functionality preserved")
+	fmt.Println("✅ New Metadata struct for future extensibility")
 } 

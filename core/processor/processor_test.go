@@ -9,10 +9,10 @@ import (
 
 func TestParse(t *testing.T) {
 	tests := []struct {
-		name       string
-		lines      []string
-		parserType ParserType
-		wantErr    bool
+		name     string
+		lines    []string
+		metadata *Metadata
+		wantErr  bool
 	}{
 		{
 			name: "valid college study guide",
@@ -25,8 +25,8 @@ func TestParse(t *testing.T) {
 				"",
 				"Learn More: See Khan Academy's linear equations course.",
 			},
-			parserType: Colleges,
-			wantErr:    false,
+			metadata: NewMetadata(Colleges),
+			wantErr:  false,
 		},
 		{
 			name: "valid AP exam study guide",
@@ -37,8 +37,8 @@ func TestParse(t *testing.T) {
 				"1. What is a derivative? - The rate of change of a function.",
 				"2. How do you find the derivative of x²? - Use the power rule: 2x.",
 			},
-			parserType: APExams,
-			wantErr:    false,
+			metadata: NewMetadata(APExams),
+			wantErr:  false,
 		},
 		{
 			name: "missing file header",
@@ -46,20 +46,20 @@ func TestParse(t *testing.T) {
 				"Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations",
 				"1. What is x? - A variable",
 			},
-			parserType: Colleges,
-			wantErr:    true,
+			metadata: NewMetadata(Colleges),
+			wantErr:  true,
 		},
 		{
-			name:       "empty lines",
-			lines:      []string{},
-			parserType: Colleges,
-			wantErr:    true,
+			name:     "empty lines",
+			lines:    []string{},
+			metadata: NewMetadata(Colleges),
+			wantErr:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ast, err := Parse(tt.lines, tt.parserType)
+			ast, err := Parse(tt.lines, tt.metadata)
 			if tt.wantErr {
 				if err == nil {
 					t.Errorf("Parse() expected error but got none")
@@ -77,8 +77,8 @@ func TestParse(t *testing.T) {
 			if ast.Root == nil {
 				t.Errorf("Parse() returned AST with nil root")
 			}
-			if ast.ParserType != parser.ParserType(tt.parserType) {
-				t.Errorf("Parse() returned AST with wrong parser type: got %s, want %s", ast.ParserType, tt.parserType)
+			if ast.ParserType != parser.ParserType(tt.metadata.ParserType) {
+				t.Errorf("Parse() returned AST with wrong parser type: got %s, want %s", ast.ParserType, tt.metadata.ParserType)
 			}
 		})
 	}
@@ -101,7 +101,7 @@ Learn More: See Khan Academy's linear equations course.`
 	if _, err := tmpFile.WriteString(testContent); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
-	ast, err := ParseFile(tmpFile.Name(), Colleges)
+	ast, err := ParseFile(tmpFile.Name(), NewMetadata(Colleges))
 	if err != nil {
 		t.Errorf("ParseFile() unexpected error: %v", err)
 		return
@@ -118,10 +118,10 @@ Learn More: See Khan Academy's linear equations course.`
 	}
 }
 
-func TestParserTypeConstants(t *testing.T) {
+func TestMetadata(t *testing.T) {
 	tests := []struct {
 		name       string
-		parserType ParserType
+		parserType string
 		expected   string
 	}{
 		{"Colleges", Colleges, "colleges"},
@@ -132,9 +132,26 @@ func TestParserTypeConstants(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if string(tt.parserType) != tt.expected {
-				t.Errorf("ParserType %s = %s, want %s", tt.name, tt.parserType, tt.expected)
+			metadata := NewMetadata(tt.parserType)
+			if metadata.ParserType != tt.expected {
+				t.Errorf("Metadata ParserType = %s, want %s", metadata.ParserType, tt.expected)
 			}
 		})
+	}
+}
+
+func TestMetadataWithOption(t *testing.T) {
+	metadata := NewMetadata(Colleges).WithOption("strict", "true").WithOption("debug", "false")
+	
+	if metadata.ParserType != "colleges" {
+		t.Errorf("Expected parser type 'colleges', got %s", metadata.ParserType)
+	}
+	
+	if metadata.Options["strict"] != "true" {
+		t.Errorf("Expected option 'strict' to be 'true', got %s", metadata.Options["strict"])
+	}
+	
+	if metadata.Options["debug"] != "false" {
+		t.Errorf("Expected option 'debug' to be 'false', got %s", metadata.Options["debug"])
 	}
 } 
