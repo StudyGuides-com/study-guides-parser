@@ -79,7 +79,7 @@ func isComment(line string, lineNum int) (TokenType, *LexerError) {
 //   - TokenType: The type of line (Empty if valid, empty string if not)
 //   - *LexerError: Any validation errors found
 func isEmpty(line string, lineNum int) (TokenType, *LexerError) {
-	if cleanstring.New(line).IsEmpty() {
+	if line == "" {
 		return TokenTypeEmpty, nil
 	}
 	return "", nil

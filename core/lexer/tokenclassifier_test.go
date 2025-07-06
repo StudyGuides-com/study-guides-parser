@@ -4,6 +4,8 @@ package lexer
 
 import (
 	"testing"
+
+	"github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
 )
 
 // errorMatches checks if a LexerError matches the expected error code and message
@@ -258,7 +260,9 @@ func TestIsEmpty(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotType, gotErr := isEmpty(tt.line, tt.lineNum)
+			// Simulate how the lexer calls the classifier with cleaned line
+			cleaned := cleanstring.New(tt.line).Clean()
+			gotType, gotErr := isEmpty(cleaned, tt.lineNum)
 			if gotType != tt.wantType {
 				t.Errorf("isEmpty() gotType = %v, want %v", gotType, tt.wantType)
 			}
