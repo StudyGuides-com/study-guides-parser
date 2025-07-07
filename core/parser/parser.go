@@ -9,16 +9,14 @@ import (
 )
 
 type Parser struct {
-	Root       *Node // The root node representing the entire tree (now it will be the file header)
-	Current    *Node // The current "open" node (e.g., a header or passage)
-	Lines      []preparser.ParsedLineInfo
-	ParserType ParserType
+	Root    *Node // The root node representing the entire tree (now it will be the file header)
+	Current *Node // The current "open" node (e.g., a header or passage)
+	Lines   []preparser.ParsedLineInfo
 }
 
-func NewParser(parserType ParserType, lines []preparser.ParsedLineInfo) *Parser {
+func NewParser(lines []preparser.ParsedLineInfo) *Parser {
 	return &Parser{
-		ParserType: parserType,
-		Lines:      lines,
+		Lines: lines,
 	}
 }
 
@@ -50,13 +48,13 @@ func (p *Parser) findNearest(target lexer.TokenType) *Node {
 }
 
 // finalize returns the parsed content as an AbstractSyntaxTree
-func (p *Parser) finalize() (*AbstractSyntaxTree, *ParserError) {
+func (p *Parser) finalize(parserType ParserType) (*AbstractSyntaxTree, *ParserError) {
 	if p.Root == nil {
 		return nil, NewParserError(CodeValidation, "no root node found", preparser.ParsedLineInfo{})
 	}
 
 	output := &AbstractSyntaxTree{
-		ParserType: p.ParserType,
+		ParserType: parserType,
 		Timestamp:  time.Now().UTC().Format(time.RFC3339),
 		Root:       p.Root,
 	}
@@ -65,7 +63,7 @@ func (p *Parser) finalize() (*AbstractSyntaxTree, *ParserError) {
 }
 
 // see internal/services/parser/gramar.ebnf for the grammar
-func (p *Parser) Parse() (*AbstractSyntaxTree, *ParserError) {
+func (p *Parser) Parse(parserType ParserType) (*AbstractSyntaxTree, *ParserError) {
 	if len(p.Lines) == 0 {
 		return nil, NewParserError(CodeValidation, "no lines to parse", preparser.ParsedLineInfo{})
 	}
@@ -151,5 +149,5 @@ func (p *Parser) Parse() (*AbstractSyntaxTree, *ParserError) {
 		}
 	}
 
-	return p.finalize()
+	return p.finalize(parserType)
 }

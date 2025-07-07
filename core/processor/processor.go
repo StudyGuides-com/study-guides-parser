@@ -73,8 +73,8 @@ func Parse(lines []string, metadata *Metadata) (*parser.AbstractSyntaxTree, erro
 		return nil, fmt.Errorf("preparser failed: %v", preOut.Errors)
 	}
 
-	p := parser.NewParser(parser.ParserType(metadata.ParserType), preOut.Tokens)
-	ast, parserErr := p.Parse()
+	p := parser.NewParser(preOut.Tokens)
+	ast, parserErr := p.Parse(parser.ParserType(metadata.ParserType))
 	if parserErr != nil {
 		return nil, fmt.Errorf("parser error: %w", parserErr)
 	}

@@ -208,8 +208,8 @@ func TestParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			parser := NewParser(tt.parserType, tt.lines)
-			result, err := parser.Parse()
+					parser := NewParser(tt.lines)
+		result, err := parser.Parse(tt.parserType)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parser.Parse() error = %v, wantErr %v", err, tt.wantErr)
@@ -279,7 +279,7 @@ func TestFindNearest(t *testing.T) {
 
 func TestFinalize_NoRoot(t *testing.T) {
 	p := &Parser{}
-	ast, err := p.finalize()
+	ast, err := p.finalize("test")
 	if err == nil {
 		t.Error("finalize should error if Root is nil")
 	}

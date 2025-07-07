@@ -28,8 +28,8 @@ for _, token := range tokens {
     }
     lines = append(lines, parsedLine)
 }
-parser := parser.NewParser(parserType, lines)
-ast, err := parser.Parse()
+parser := parser.NewParser(lines)
+ast, err := parser.Parse(parserType)
 ```
 
 ## Improvements Status
