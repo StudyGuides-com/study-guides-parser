@@ -2,15 +2,15 @@ package preparser
 
 // ParsedValue represents all possible parsed result types
 type ParsedValue struct {
-	Question   *QuestionResult
-	Header     *HeaderResult
-	Comment    *CommentResult
-	Empty      *EmptyLineResult
-	FileHeader *FileHeaderResult
-	Passage    *PassageResult
-	LearnMore  *LearnMoreResult
-	Content    *ContentResult
-	Binary     *BinaryResult
+	Question   *QuestionResult `json:"question,omitempty"`
+	Header     *HeaderResult   `json:"header,omitempty"`
+	Comment    *CommentResult  `json:"comment,omitempty"`
+	Empty      *EmptyLineResult `json:"empty,omitempty"`
+	FileHeader *FileHeaderResult `json:"file_header,omitempty"`
+	Passage    *PassageResult   `json:"passage,omitempty"`
+	LearnMore  *LearnMoreResult `json:"learn_more,omitempty"`
+	Content    *ContentResult   `json:"content,omitempty"`
+	Binary     *BinaryResult    `json:"binary,omitempty"`
 }
 
 // GetQuestion returns the QuestionResult if this is a question, nil otherwise
