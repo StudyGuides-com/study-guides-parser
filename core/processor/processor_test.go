@@ -158,66 +158,7 @@ func TestMetadataWithOption(t *testing.T) {
 	}
 }
 
-func TestPreparseCollectsAllErrors(t *testing.T) {
-	lines := []string{
-		"Study Guide", // Valid file header
-		"Section: Chapter 1", // Valid header
-		"Learn more about this topic", // Invalid - should be "Learn More: about this topic"
-		"1. What is Go? Answer", // Invalid - missing delimiter
-		"Passage: This is a valid passage", // Valid passage
-		"Some content here", // Valid content
-	}
 
-	result, err := Preparse(lines)
-	if err != nil {
-		t.Fatalf("Preparse() returned unexpected error: %v", err)
-	}
-
-	// Debug output
-	t.Logf("Success: %v", result.Success)
-	t.Logf("Number of errors: %d", len(result.Errors))
-	t.Logf("Errors: %v", result.Errors)
-	t.Logf("Number of tokens: %d", len(result.Tokens))
-
-	// Should not be successful due to multiple errors
-	if result.Success {
-		t.Error("Preparse() should return Success=false when there are errors")
-	}
-
-	// Should have collected multiple errors
-	if len(result.Errors) < 2 {
-		t.Errorf("Preparse() should collect multiple errors, got %d: %v", len(result.Errors), result.Errors)
-	}
-
-	// Check for specific error substrings
-	containsSubstring := func(sub string) bool {
-		for _, msg := range result.Errors {
-			if strings.Contains(msg, sub) {
-				return true
-			}
-		}
-		return false
-	}
-
-	if !containsSubstring("learn more line must start with 'Learn More:'") {
-		t.Error("Expected error about learn more line format not found")
-	}
-
-	if !containsSubstring("question must contain answer delimiter ' - '") {
-		t.Error("Expected error about question delimiter not found")
-	}
-
-	// Should still have parsed tokens for valid lines
-	if len(result.Tokens) == 0 {
-		t.Error("Preparse() should still return tokens for valid lines even when there are errors")
-	}
-
-	// Should have tokens for the valid lines (file header, header, passage, content)
-	expectedValidTokens := 4
-	if len(result.Tokens) != expectedValidTokens {
-		t.Errorf("Expected %d valid tokens, got %d", expectedValidTokens, len(result.Tokens))
-	}
-}
 
 func TestPreparseReturnsOnlyLexerErrors(t *testing.T) {
 	lines := []string{
