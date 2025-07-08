@@ -82,34 +82,38 @@ func Lex(lines []string) (LexerOutput, error) {
 }
 
 func Preparse(lines []string) (PreparserOutput, error) {
+	// Step 1: Run lexer and collect all lexer errors
 	lexOut, err := Lex(lines)
-	if err != nil || !lexOut.Success {
-		var errorStrings []string
-		if err != nil {
-			errorStrings = append(errorStrings, err.Error())
-		}
+	if err != nil {
+		// If there's a critical error with the lexer itself, return it
 		return PreparserOutput{
-			Errors:  errorStrings,
+			Errors:  []string{err.Error()},
 			Success: false,
 		}, err
 	}
 
-	pre := preparser.NewPreparser(lexOut.Tokens, "")
-	parsed, prepErr := pre.Parse()
-	var errors []error
-	if prepErr != nil {
-		errors = append(errors, prepErr)
+	// If lexer failed, return immediately with lexer errors
+	if !lexOut.Success {
+		return PreparserOutput{
+			Tokens:  nil,
+			Errors:  lexOut.Errors,
+			Success: false,
+		}, nil
 	}
+
+	// Step 2: Run preparser only if lexer succeeded
+	pre := preparser.NewPreparser(lexOut.Tokens, "")
+	parsed, prepErrors := pre.Parse()
 	
-	// Convert errors to strings for JSON serialization
-	errorStrings := make([]string, len(errors))
-	for i, err := range errors {
-		errorStrings[i] = err.Error()
+	// Add all preparser errors if any, including line numbers
+	var allErrors []string
+	for _, prepErr := range prepErrors {
+		allErrors = append(allErrors, fmt.Sprintf("line %d: %s", prepErr.LineInfo.Number, prepErr.Error()))
 	}
 	
 	return PreparserOutput{
 		Tokens:  parsed,
-		Errors:  errorStrings,
-		Success: len(errors) == 0,
+		Errors:  allErrors,
+		Success: len(allErrors) == 0,
 	}, nil
 }

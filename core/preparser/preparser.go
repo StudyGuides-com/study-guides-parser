@@ -25,14 +25,17 @@ func NewPreparser(lines []LineInfo, parserType string) *Preparser {
 //
 // Returns:
 //   - []ParsedLineInfo: Array of parsed line information
-//   - *PreParsingError: Any error that occurred during parsing
-func (p *Preparser) Parse() ([]ParsedLineInfo, *PreParsingError) {
+//   - []*PreParsingError: All errors that occurred during parsing
+func (p *Preparser) Parse() ([]ParsedLineInfo, []*PreParsingError) {
 	parsedLines := make([]ParsedLineInfo, 0, len(p.Lines))
+	var allErrors []*PreParsingError
 
 	for _, line := range p.Lines {
 		result, err := p.parseLine(line)
 		if err != nil {
-			return nil, err
+			allErrors = append(allErrors, err)
+			// Continue processing other lines to collect all errors
+			continue
 		}
 
 		info := ParsedLineInfo{
@@ -43,7 +46,8 @@ func (p *Preparser) Parse() ([]ParsedLineInfo, *PreParsingError) {
 		}
 		parsedLines = append(parsedLines, info)
 	}
-	return parsedLines, nil
+	
+	return parsedLines, allErrors
 }
 
 // parseLine handles the parsing of a single line based on its type
