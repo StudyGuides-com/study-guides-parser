@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
-	"github.com/studyguides-com/study-guides-parser/core/types"
 )
 
 
@@ -28,7 +28,7 @@ type PreparserOutput struct {
 }
 
 // ParseFile reads a file and parses it into an Abstract Syntax Tree
-func ParseFile(filename string, metadata *types.Metadata) (*parser.AbstractSyntaxTree, error) {
+func ParseFile(filename string, metadata *config.Metadata) (*parser.AbstractSyntaxTree, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s: %w", filename, err)
@@ -38,7 +38,7 @@ func ParseFile(filename string, metadata *types.Metadata) (*parser.AbstractSynta
 }
 
 // Parse parses a slice of strings into an Abstract Syntax Tree
-func Parse(lines []string, metadata *types.Metadata) (*parser.AbstractSyntaxTree, error) {
+func Parse(lines []string, metadata *config.Metadata) (*parser.AbstractSyntaxTree, error) {
 	preOut, err := Preparse(lines)
 	if err != nil {
 		return nil, fmt.Errorf("preparser error: %w", err)

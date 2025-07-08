@@ -1,4 +1,4 @@
-package types
+package config
 
 // Metadata contains configuration and metadata for parsing
 type Metadata struct {
@@ -6,10 +6,8 @@ type Metadata struct {
 	Options map[string]string `json:"options,omitempty"`
 }
 
-
-
-// NewMetadata creates a new Metadata struct with the given type
-func NewMetadata(typeName string) *Metadata {
+// NewMetaData creates a new Metadata struct with the given type
+func NewMetaData(typeName string) *Metadata {
 	return &Metadata{
 		Type:    typeName,
 		Options: make(map[string]string),

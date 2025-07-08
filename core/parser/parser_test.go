@@ -5,9 +5,9 @@ package parser
 import (
 	"testing"
 
+	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
-	"github.com/studyguides-com/study-guides-parser/core/types"
 )
 
 func TestParser(t *testing.T) {
@@ -202,9 +202,9 @@ func TestParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-					parser := NewParser(tt.lines)
-		metadata := types.NewMetadata("test_parser")
-		result, err := parser.Parse(metadata)
+			parser := NewParser(tt.lines)
+			metadata := config.NewMetaData("test_parser")
+			result, err := parser.Parse(metadata)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parser.Parse() error = %v, wantErr %v", err, tt.wantErr)
@@ -216,8 +216,6 @@ func TestParser(t *testing.T) {
 					t.Error("Parser.Parse() returned nil result when no error expected")
 					return
 				}
-
-
 
 				if result.Root == nil {
 					t.Error("Parser.Parse() returned nil root node")
@@ -272,7 +270,7 @@ func TestFindNearest(t *testing.T) {
 
 func TestFinalize_NoRoot(t *testing.T) {
 	p := &Parser{}
-	metadata := types.NewMetadata("test")
+	metadata := config.NewMetaData("test")
 	ast, err := p.finalize(metadata)
 	if err == nil {
 		t.Error("finalize should error if Root is nil")

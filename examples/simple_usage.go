@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/processor"
-	"github.com/studyguides-com/study-guides-parser/core/types"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	}
 
 	fmt.Println("=== Example 1: Parse from strings ===")
-	metadata := types.NewMetadata("example_parser")
+	metadata := config.NewMetaData("example_parser")
 	ast, err := processor.Parse(lines, metadata)
 	if err != nil {
 		log.Fatal("Error parsing lines:", err)
@@ -35,7 +35,7 @@ func main() {
 	// Example 2: Parse from file
 	fmt.Println("\n=== Example 2: Parse from file ===")
 	// This would work with an actual file
-	// ast, err = processor.ParseFile("study_guide.txt", processor.NewMetadata(processor.Colleges))
+	// ast, err = processor.ParseFile("study_guide.txt", config.New("example_parser"))
 	// if err != nil {
 	//     log.Fatal("Error parsing file:", err)
 	// }
@@ -50,7 +50,7 @@ func main() {
 		"2. How do you find the derivative of x²? - Use the power rule: 2x.",
 	}
 
-	apMetadata := types.NewMetadata("ap_example_parser")
+	apMetadata := config.NewMetaData("ap_example_parser")
 	ast, err = processor.Parse(apLines, apMetadata)
 	if err != nil {
 		log.Fatal("Error parsing AP exam:", err)
@@ -63,7 +63,7 @@ func main() {
 
 	// Example 4: Advanced usage with options
 	fmt.Println("\n=== Example 4: Advanced usage with options ===")
-	advancedMetadata := types.NewMetadata("advanced_parser").
+	advancedMetadata := config.NewMetaData("advanced_parser").
 		WithOption("strict", "true").
 		WithOption("debug", "false").
 		WithOption("version", "1.0")
@@ -78,7 +78,7 @@ func main() {
 		"1. What is x? - A variable",
 	}
 
-	_, err = processor.Parse(invalidLines, types.NewMetadata("test_parser"))
+	_, err = processor.Parse(invalidLines, config.NewMetaData("test_parser"))
 	if err != nil {
 		fmt.Printf("Expected error: %v\n", err)
 	}

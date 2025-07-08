@@ -1,8 +1,8 @@
 package parser
 
 import (
+	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
-	"github.com/studyguides-com/study-guides-parser/core/types"
 )
 
 // Node represents a single node in the parser syntax tree
@@ -15,7 +15,7 @@ type Node struct {
 
 // AbstractSyntaxTree represents the output of a parser tree
 type AbstractSyntaxTree struct {
-	Metadata *types.Metadata `json:"metadata"`
-	Timestamp string         `json:"timestamp"`
-	Root      *Node          `json:"root"`
+	Metadata *config.Metadata `json:"metadata"`
+	Timestamp string          `json:"timestamp"`
+	Root      *Node           `json:"root"`
 }

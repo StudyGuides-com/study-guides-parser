@@ -4,14 +4,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/studyguides-com/study-guides-parser/core/types"
+	"github.com/studyguides-com/study-guides-parser/core/config"
 )
 
 func TestParse(t *testing.T) {
 	tests := []struct {
 		name     string
 		lines    []string
-		metadata *types.Metadata
+		metadata *config.Metadata
 		wantErr  bool
 	}{
 		{
@@ -25,7 +25,7 @@ func TestParse(t *testing.T) {
 				"",
 				"Learn More: See Khan Academy's linear equations course.",
 			},
-			metadata: types.NewMetadata("test_parser"),
+			metadata: config.NewMetaData("test_parser"),
 			wantErr:  false,
 		},
 		{
@@ -37,7 +37,7 @@ func TestParse(t *testing.T) {
 				"1. What is a derivative? - The rate of change of a function.",
 				"2. How do you find the derivative of x²? - Use the power rule: 2x.",
 			},
-			metadata: types.NewMetadata("ap_test_parser"),
+			metadata: config.NewMetaData("ap_test_parser"),
 			wantErr:  false,
 		},
 		{
@@ -46,13 +46,13 @@ func TestParse(t *testing.T) {
 				"Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations",
 				"1. What is x? - A variable",
 			},
-			metadata: types.NewMetadata("test_parser"),
+			metadata: config.NewMetaData("test_parser"),
 			wantErr:  true,
 		},
 		{
 			name:     "empty lines",
 			lines:    []string{},
-			metadata: types.NewMetadata("test_parser"),
+			metadata: config.NewMetaData("test_parser"),
 			wantErr:  true,
 		},
 	}
@@ -99,7 +99,7 @@ Learn More: See Khan Academy's linear equations course.`
 	if _, err := tmpFile.WriteString(testContent); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
-	ast, err := ParseFile(tmpFile.Name(), types.NewMetadata("test_parser"))
+	ast, err := ParseFile(tmpFile.Name(), config.NewMetaData("test_parser"))
 	if err != nil {
 		t.Errorf("ParseFile() unexpected error: %v", err)
 		return
@@ -128,7 +128,7 @@ func TestMetadata(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-					metadata := types.NewMetadata(tt.parserType)
+					metadata := config.NewMetaData(tt.parserType)
 		if metadata.Type != tt.expected {
 			t.Errorf("Metadata Type = %s, want %s", metadata.Type, tt.expected)
 		}
@@ -137,7 +137,7 @@ func TestMetadata(t *testing.T) {
 }
 
 func TestMetadataWithOption(t *testing.T) {
-	metadata := types.NewMetadata("test_parser").WithOption("strict", "true").WithOption("debug", "false")
+	metadata := config.NewMetaData("test_parser").WithOption("strict", "true").WithOption("debug", "false")
 	
 	if metadata.Type != "test_parser" {
 		t.Errorf("Expected parser type 'test_parser', got %s", metadata.Type)
