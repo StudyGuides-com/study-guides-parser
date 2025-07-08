@@ -63,24 +63,37 @@ func TestParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ast, err := Parse(tt.lines, tt.metadata)
-			if tt.wantErr {
-				if err == nil {
-					t.Errorf("Parse() expected error but got none")
-				} else if tt.wantErrSubstr != "" && !strings.Contains(err.Error(), tt.wantErrSubstr) {
-					t.Errorf("Parse() error = %v, want substring %q", err, tt.wantErrSubstr)
-				}
-				return
-			}
+			result, err := Parse(tt.lines, tt.metadata)
 			if err != nil {
 				t.Errorf("Parse() unexpected error: %v", err)
 				return
 			}
-			if ast == nil {
+			if tt.wantErr {
+				if result.Success {
+					t.Errorf("Parse() expected error but got success")
+				} else if tt.wantErrSubstr != "" {
+					found := false
+					for _, parseErr := range result.Errors {
+						if strings.Contains(parseErr.Message, tt.wantErrSubstr) {
+							found = true
+							break
+						}
+					}
+					if !found {
+						t.Errorf("Parse() error messages = %v, want substring %q", result.Errors, tt.wantErrSubstr)
+					}
+				}
+				return
+			}
+			if !result.Success {
+				t.Errorf("Parse() unexpected errors: %v", result.Errors)
+				return
+			}
+			if result.AST == nil {
 				t.Errorf("Parse() returned nil AST")
 				return
 			}
-			if ast.Root == nil {
+			if result.AST.Root == nil {
 				t.Errorf("Parse() returned AST with nil root")
 			}
 
@@ -105,16 +118,20 @@ Learn More: See Khan Academy's linear equations course.`
 	if _, err := tmpFile.WriteString(testContent); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
-	ast, err := ParseFile(tmpFile.Name(), config.NewMetaData("test_parser"))
+	result, err := ParseFile(tmpFile.Name(), config.NewMetaData("test_parser"))
 	if err != nil {
 		t.Errorf("ParseFile() unexpected error: %v", err)
 		return
 	}
-	if ast == nil {
+	if !result.Success {
+		t.Errorf("ParseFile() unexpected errors: %v", result.Errors)
+		return
+	}
+	if result.AST == nil {
 		t.Errorf("ParseFile() returned nil AST")
 		return
 	}
-	if ast.Root == nil {
+	if result.AST.Root == nil {
 		t.Errorf("ParseFile() returned AST with nil root")
 	}
 
@@ -158,8 +175,6 @@ func TestMetadataWithOption(t *testing.T) {
 	}
 }
 
-
-
 func TestPreparseReturnsOnlyLexerErrors(t *testing.T) {
 	lines := []string{
 		"\x00\x01\x02Invalid binary data", // Should trigger a lexer error
@@ -183,9 +198,9 @@ func TestPreparseReturnsOnlyLexerErrors(t *testing.T) {
 		t.Errorf("Preparse() should not return tokens when there are lexer errors, got %d", len(result.Tokens))
 	}
 
-	for _, msg := range result.Errors {
-		if !strings.Contains(msg, "line 1") {
-			t.Errorf("Expected lexer error to mention line 1, got: %s", msg)
+	for _, err := range result.Errors {
+		if err.LineNumber != 1 {
+			t.Errorf("Expected lexer error to be on line 1, got line %d", err.LineNumber)
 		}
 	}
 }
@@ -213,7 +228,7 @@ func TestPreparseReturnsOnlyPreparserErrors(t *testing.T) {
 		t.Errorf("Preparse() should collect one preparser error, got %d: %v", len(result.Errors), result.Errors)
 	}
 
-	if !strings.Contains(result.Errors[0], "learn more line must contain text after 'Learn More:'") {
+	if !strings.Contains(result.Errors[0].Message, "learn more line must contain text after 'Learn More:'") {
 		t.Error("Expected error about learn more line missing text not found")
 	}
 
@@ -233,10 +248,25 @@ func TestParseFileWithLexerError(t *testing.T) {
 	if _, err := tmpFile.WriteString(testContent); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
-	_, err = ParseFile(tmpFile.Name(), config.NewMetaData("test_parser"))
-	if err == nil {
-		t.Error("ParseFile() should return error for file with lexer error, got nil")
-	} else if !strings.Contains(err.Error(), "line 1") {
-		t.Errorf("Expected lexer error to mention line 1, got: %s", err.Error())
+	result, err := ParseFile(tmpFile.Name(), config.NewMetaData("test_parser"))
+	if err != nil {
+		t.Errorf("ParseFile() unexpected error: %v", err)
+		return
+	}
+	if result.Success {
+		t.Error("ParseFile() should return Success=false for file with lexer error")
+	} else if len(result.Errors) == 0 {
+		t.Error("ParseFile() should return lexer errors")
+	} else {
+		found := false
+		for _, parseErr := range result.Errors {
+			if parseErr.LineNumber == 1 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Error("Expected lexer error to be on line 1")
+		}
 	}
 } 
