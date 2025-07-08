@@ -427,6 +427,14 @@ func TestIsLearnMore(t *testing.T) {
 			wantErrMsg:  "",
 		},
 		{
+			name:        "valid learn more with lowercase m",
+			line:        "Learn more: Additional information",
+			lineNum:     1,
+			wantType:    TokenTypeLearnMore,
+			wantErrCode: "",
+			wantErrMsg:  "",
+		},
+		{
 			name:        "valid learn more with leading spaces",
 			line:        "   Learn More: Additional information",
 			lineNum:     1,
