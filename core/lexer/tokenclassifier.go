@@ -3,9 +3,9 @@ package lexer
 import (
 	"strings"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
-	"github.com/StudyGuides-com/study-guides-parser/core/constants"
-	"github.com/StudyGuides-com/study-guides-parser/core/regexes"
+	"github.com/studyguides-com/study-guides-parser/core/cleanstring"
+	"github.com/studyguides-com/study-guides-parser/core/constants"
+	"github.com/studyguides-com/study-guides-parser/core/regexes"
 )
 
 type TokenClassifier func(string, int) (TokenType, *LexerError)

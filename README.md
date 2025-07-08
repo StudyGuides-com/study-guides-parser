@@ -255,7 +255,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 For questions, issues, or contributions, please:
 
-1. Check the [Issues](https://github.com/StudyGuides-com/study-guides-parser/issues) page
+1. Check the [Issues](https://github.com/studyguides-com/study-guides-parser/issues) page
 2. Create a new issue with a clear description
 3. Include example input and expected output
 

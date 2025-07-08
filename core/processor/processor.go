@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/lexer"
-	"github.com/StudyGuides-com/study-guides-parser/core/parser"
-	"github.com/StudyGuides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/lexer"
+	"github.com/studyguides-com/study-guides-parser/core/parser"
+	"github.com/studyguides-com/study-guides-parser/core/preparser"
 )
 
 // Metadata contains configuration and metadata for parsing

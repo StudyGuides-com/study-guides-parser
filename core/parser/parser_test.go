@@ -5,8 +5,8 @@ package parser
 import (
 	"testing"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/lexer"
-	"github.com/StudyGuides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/lexer"
+	"github.com/studyguides-com/study-guides-parser/core/preparser"
 )
 
 func TestParser(t *testing.T) {

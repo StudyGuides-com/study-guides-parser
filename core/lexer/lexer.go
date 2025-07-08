@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
+	"github.com/studyguides-com/study-guides-parser/core/cleanstring"
 )
 
 // Lexer provides functionality to process individual lines of text, detecting their type and

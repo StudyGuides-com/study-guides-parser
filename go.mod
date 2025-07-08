@@ -1,3 +1,3 @@
-module github.com/StudyGuides-com/study-guides-parser
+module github.com/studyguides-com/study-guides-parser
 
 go 1.20

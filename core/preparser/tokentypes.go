@@ -1,6 +1,6 @@
 package preparser
 
-import "github.com/StudyGuides-com/study-guides-parser/core/lexer"
+import "github.com/studyguides-com/study-guides-parser/core/lexer"
 
 // TokenType is imported from the lexer package
 type TokenType = lexer.TokenType

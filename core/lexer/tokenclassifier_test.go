@@ -5,7 +5,7 @@ package lexer
 import (
 	"testing"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/cleanstring"
+	"github.com/studyguides-com/study-guides-parser/core/cleanstring"
 )
 
 // errorMatches checks if a LexerError matches the expected error code and message

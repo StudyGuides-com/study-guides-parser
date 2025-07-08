@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/StudyGuides-com/study-guides-parser/core/lexer"
+	"github.com/studyguides-com/study-guides-parser/core/lexer"
 )
 
 // ParserType represents the type of parser being used

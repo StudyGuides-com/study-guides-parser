@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/parser"
+	"github.com/studyguides-com/study-guides-parser/core/parser"
 )
 
 func TestParse(t *testing.T) {

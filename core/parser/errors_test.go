@@ -5,7 +5,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/preparser"
 )
 
 func TestParserError_Error(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/processor"
+	"github.com/studyguides-com/study-guides-parser/core/processor"
 )
 
 func main() {

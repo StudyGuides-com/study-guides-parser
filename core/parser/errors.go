@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 
-	"github.com/StudyGuides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/preparser"
 )
 
 // ErrorCode represents a service error code
