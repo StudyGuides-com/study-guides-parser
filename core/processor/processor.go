@@ -64,6 +64,19 @@ func Parse(lines []string, metadata *config.Metadata) (*ParseResult, error) {
 		}, nil
 	}
 
+	return ParseFromPreparse(preOut, metadata)
+}
+
+// ParseFromPreparse takes preparser output and runs the parser on it
+func ParseFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*ParseResult, error) {
+	// If preparser failed, return immediately with preparser errors
+	if !preOut.Success {
+		return &ParseResult{
+			Errors:  preOut.Errors,
+			Success: false,
+		}, nil
+	}
+
 	p := parser.NewParser(preOut.Tokens)
 	ast, parserErr := p.Parse(metadata)
 	if parserErr != nil {
@@ -139,6 +152,21 @@ func Preparse(lines []string) (PreparserOutput, error) {
 	}
 
 	// Step 2: Run preparser only if lexer succeeded
+	return PreparseFromLex(lexOut)
+}
+
+// PreparseFromLex takes lexer output and runs the preparser on it
+func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
+	// If lexer failed, return immediately with lexer errors
+	if !lexOut.Success {
+		return PreparserOutput{
+			Tokens:  nil,
+			Errors:  lexOut.Errors,
+			Success: false,
+		}, nil
+	}
+
+	// Run preparser on the lexer tokens
 	pre := preparser.NewPreparser(lexOut.Tokens, "")
 	parsed, prepErrors := pre.Parse()
 	
@@ -161,38 +189,4 @@ func Preparse(lines []string) (PreparserOutput, error) {
 	}, nil
 }
 
-// ParseWithErrors parses a slice of strings and returns both the AST and any errors that occurred
-func ParseWithErrors(lines []string, metadata *config.Metadata) (*parser.AbstractSyntaxTree, []ProcessingError, error) {
-	preOut, err := Preparse(lines)
-	if err != nil {
-		return nil, nil, fmt.Errorf("preparser error: %w", err)
-	}
-	if !preOut.Success {
-		return nil, preOut.Errors, nil
-	}
 
-	p := parser.NewParser(preOut.Tokens)
-	ast, parserErr := p.Parse(metadata)
-	if parserErr != nil {
-		// Convert parser error to ProcessingError format
-		parserError := ProcessingError{
-			LineNumber: parserErr.LineInfo.Number,
-			Message:    parserErr.Message,
-			Code:       string(parserErr.Code),
-			Text:       parserErr.LineInfo.Text,
-			Type:       string(parserErr.LineInfo.Type),
-		}
-		return nil, []ProcessingError{parserError}, nil
-	}
-	return ast, nil, nil
-}
-
-// ParseFileWithErrors reads a file and parses it, returning both the AST and any errors
-func ParseFileWithErrors(filename string, metadata *config.Metadata) (*parser.AbstractSyntaxTree, []ProcessingError, error) {
-	content, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to read file %s: %w", filename, err)
-	}
-	lines := strings.Split(string(content), "\n")
-	return ParseWithErrors(lines, metadata)
-}
