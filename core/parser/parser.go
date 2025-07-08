@@ -6,6 +6,7 @@ import (
 
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/types"
 )
 
 type Parser struct {
@@ -48,22 +49,22 @@ func (p *Parser) findNearest(target lexer.TokenType) *Node {
 }
 
 // finalize returns the parsed content as an AbstractSyntaxTree
-func (p *Parser) finalize(parserType ParserType) (*AbstractSyntaxTree, *ParserError) {
+func (p *Parser) finalize(metadata *types.Metadata) (*AbstractSyntaxTree, *ParserError) {
 	if p.Root == nil {
 		return nil, NewParserError(CodeValidation, "no root node found", preparser.ParsedLineInfo{})
 	}
 
 	output := &AbstractSyntaxTree{
-		ParserType: parserType,
-		Timestamp:  time.Now().UTC().Format(time.RFC3339),
-		Root:       p.Root,
+		Metadata:  metadata,
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Root:      p.Root,
 	}
 
 	return output, nil
 }
 
 // see internal/services/parser/gramar.ebnf for the grammar
-func (p *Parser) Parse(parserType ParserType) (*AbstractSyntaxTree, *ParserError) {
+func (p *Parser) Parse(metadata *types.Metadata) (*AbstractSyntaxTree, *ParserError) {
 	if len(p.Lines) == 0 {
 		return nil, NewParserError(CodeValidation, "no lines to parse", preparser.ParsedLineInfo{})
 	}
@@ -149,5 +150,5 @@ func (p *Parser) Parse(parserType ParserType) (*AbstractSyntaxTree, *ParserError
 		}
 	}
 
-	return p.finalize(parserType)
+	return p.finalize(metadata)
 }

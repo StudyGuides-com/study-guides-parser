@@ -7,18 +7,17 @@ import (
 
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/types"
 )
 
 func TestParser(t *testing.T) {
 	tests := []struct {
 		name       string
-		parserType ParserType
 		lines      []preparser.ParsedLineInfo
 		wantErr    bool
 	}{
 		{
 			name:       "valid AP exam study guide",
-			parserType: "APExams",
 			lines: []preparser.ParsedLineInfo{
 				{
 					Number: 1,
@@ -57,7 +56,6 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name:       "valid entrance exam study guide",
-			parserType: "EntranceExams",
 			lines: []preparser.ParsedLineInfo{
 				{
 					Number: 1,
@@ -102,7 +100,6 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name:       "valid college study guide",
-			parserType: "Colleges",
 			lines: []preparser.ParsedLineInfo{
 				{
 					Number: 1,
@@ -136,7 +133,6 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name:       "invalid document - missing file header",
-			parserType: "Colleges",
 			lines: []preparser.ParsedLineInfo{
 				{
 					Number: 1,
@@ -152,13 +148,11 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name:       "invalid document - empty",
-			parserType: "Colleges",
 			lines:      []preparser.ParsedLineInfo{},
 			wantErr:    true,
 		},
 		{
 			name:       "valid DOD study guide",
-			parserType: "DOD",
 			lines: []preparser.ParsedLineInfo{
 				{
 					Number: 1,
@@ -209,7 +203,8 @@ func TestParser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 					parser := NewParser(tt.lines)
-		result, err := parser.Parse(tt.parserType)
+		metadata := types.NewMetadata("test_parser")
+		result, err := parser.Parse(metadata)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Parser.Parse() error = %v, wantErr %v", err, tt.wantErr)
@@ -222,9 +217,7 @@ func TestParser(t *testing.T) {
 					return
 				}
 
-				if result.ParserType != tt.parserType {
-					t.Errorf("Parser.Parse() returned parser type = %v, want %v", result.ParserType, tt.parserType)
-				}
+
 
 				if result.Root == nil {
 					t.Error("Parser.Parse() returned nil root node")
@@ -279,7 +272,8 @@ func TestFindNearest(t *testing.T) {
 
 func TestFinalize_NoRoot(t *testing.T) {
 	p := &Parser{}
-	ast, err := p.finalize("test")
+	metadata := types.NewMetadata("test")
+	ast, err := p.finalize(metadata)
 	if err == nil {
 		t.Error("finalize should error if Root is nil")
 	}

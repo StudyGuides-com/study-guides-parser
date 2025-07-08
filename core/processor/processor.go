@@ -8,36 +8,10 @@ import (
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/types"
 )
 
-// Metadata contains configuration and metadata for parsing
-type Metadata struct {
-	ParserType string            `json:"parser_type"`
-	Options    map[string]string `json:"options,omitempty"`
-}
 
-// ParserType constants for convenience
-const (
-	Colleges       = "colleges"
-	APExams        = "ap_exams"
-	Certifications = "certifications"
-	DOD            = "dod"
-	EntranceExams  = "entrance_exams"
-)
-
-// NewMetadata creates a new Metadata struct with the given parser type
-func NewMetadata(parserType string) *Metadata {
-	return &Metadata{
-		ParserType: parserType,
-		Options:    make(map[string]string),
-	}
-}
-
-// WithOption adds an option to the metadata
-func (m *Metadata) WithOption(key, value string) *Metadata {
-	m.Options[key] = value
-	return m
-}
 
 type LexerOutput struct {
 	Filename string        `json:"filename"`
@@ -54,7 +28,7 @@ type PreparserOutput struct {
 }
 
 // ParseFile reads a file and parses it into an Abstract Syntax Tree
-func ParseFile(filename string, metadata *Metadata) (*parser.AbstractSyntaxTree, error) {
+func ParseFile(filename string, metadata *types.Metadata) (*parser.AbstractSyntaxTree, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s: %w", filename, err)
@@ -64,7 +38,7 @@ func ParseFile(filename string, metadata *Metadata) (*parser.AbstractSyntaxTree,
 }
 
 // Parse parses a slice of strings into an Abstract Syntax Tree
-func Parse(lines []string, metadata *Metadata) (*parser.AbstractSyntaxTree, error) {
+func Parse(lines []string, metadata *types.Metadata) (*parser.AbstractSyntaxTree, error) {
 	preOut, err := Preparse(lines)
 	if err != nil {
 		return nil, fmt.Errorf("preparser error: %w", err)
@@ -74,7 +48,7 @@ func Parse(lines []string, metadata *Metadata) (*parser.AbstractSyntaxTree, erro
 	}
 
 	p := parser.NewParser(preOut.Tokens)
-	ast, parserErr := p.Parse(parser.ParserType(metadata.ParserType))
+	ast, parserErr := p.Parse(metadata)
 	if parserErr != nil {
 		return nil, fmt.Errorf("parser error: %w", parserErr)
 	}
