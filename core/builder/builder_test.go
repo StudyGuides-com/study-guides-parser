@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/studyguides-com/study-guides-parser/core/config"
+	"github.com/studyguides-com/study-guides-parser/core/idgen"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
@@ -952,4 +953,87 @@ func TestBuildTreeWithContent_JSONOutput(t *testing.T) {
 		t.Fatalf("Failed to marshal JSON: %v", err)
 	}
 	fmt.Println(string(jsonData))
+} 
+
+func TestTagHashGeneration(t *testing.T) {
+	// Create a simple AST with a header hierarchy
+	ast := &parser.AbstractSyntaxTree{
+		Metadata: &config.Metadata{
+			Options: map[string]string{
+				"file": "test.txt",
+			},
+			Type: "info",
+		},
+		Timestamp: "2025-07-09T11:15:18Z",
+		Root: &parser.Node{
+			Type: lexer.TokenTypeFileHeader,
+			Data: preparser.ParsedValue{
+				FileHeader: &preparser.FileHeaderResult{
+					Title: "TestFile",
+				},
+			},
+			Children: []*parser.Node{
+				{
+					Type: lexer.TokenTypeHeader,
+					Data: preparser.ParsedValue{
+						Header: &preparser.HeaderResult{
+							Parts: []string{
+								"TagA",
+								"TagB", 
+								"TagC",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Build the tree
+	tree := Build(ast, ast.Metadata)
+
+	// Verify root hash
+	expectedRootHash := idgen.HashFrom("TestFile")
+	if tree.Root.Hash != expectedRootHash {
+		t.Errorf("Root hash mismatch. Expected '%s', got '%s'", expectedRootHash, tree.Root.Hash)
+	}
+
+	// Verify TagA hash (should be hash of just "TagA" since it's the first part)
+	tagA := tree.Root.ChildTags[0]
+	expectedTagAHash := idgen.HashFrom("TagA")
+	if tagA.Hash != expectedTagAHash {
+		t.Errorf("TagA hash mismatch. Expected '%s', got '%s'", expectedTagAHash, tagA.Hash)
+	}
+
+	// Verify TagB hash (should be hash of "TagATagB" since TagA is its parent)
+	tagB := tagA.ChildTags[0]
+	expectedTagBHash := idgen.HashFrom("TagATagB")
+	if tagB.Hash != expectedTagBHash {
+		t.Errorf("TagB hash mismatch. Expected '%s', got '%s'", expectedTagBHash, tagB.Hash)
+	}
+
+	// Verify TagC hash (should be hash of "TagBTagC" since TagB is its parent)
+	tagC := tagB.ChildTags[0]
+	expectedTagCHash := idgen.HashFrom("TagBTagC")
+	if tagC.Hash != expectedTagCHash {
+		t.Errorf("TagC hash mismatch. Expected '%s', got '%s'", expectedTagCHash, tagC.Hash)
+	}
+
+	// Verify that hashes are unique
+	hashes := map[string]string{
+		tree.Root.Hash: "Root",
+		tagA.Hash:      "TagA",
+		tagB.Hash:      "TagB",
+		tagC.Hash:      "TagC",
+	}
+
+	if len(hashes) != 4 {
+		t.Error("Expected 4 unique hashes, but some hashes are duplicated")
+	}
+
+	// Print the hashes for debugging
+	t.Logf("Root hash: %s", tree.Root.Hash)
+	t.Logf("TagA hash: %s", tagA.Hash)
+	t.Logf("TagB hash: %s", tagB.Hash)
+	t.Logf("TagC hash: %s", tagC.Hash)
 } 

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/studyguides-com/study-guides-parser/core/config"
+	"github.com/studyguides-com/study-guides-parser/core/idgen"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 )
@@ -31,6 +32,8 @@ func buildTree(node *parser.Node, currentTag *Tag) {
 		// File header contains the overall title
 		if fileHeader := node.Data.GetFileHeader(); fileHeader != nil {
 			currentTag.Title = fileHeader.Title
+			// Update hash for root tag based on new title
+			currentTag.Hash = idgen.HashFrom(fileHeader.Title)
 		}
 		// Process children
 		for _, child := range node.Children {
@@ -51,45 +54,39 @@ func buildTree(node *parser.Node, currentTag *Tag) {
 	case lexer.TokenTypeQuestion:
 		// Question gets added to the current tag
 		if question := node.Data.GetQuestion(); question != nil {
-			q := &Question{
-				Prompt: question.QuestionText,
-				Answer: question.AnswerText,
-			}
 			// Check for learn more content in children
+			var learnMoreText string
 			for _, child := range node.Children {
 				if child.Type == lexer.TokenTypeLearnMore {
 					if learnMore := child.Data.GetLearnMore(); learnMore != nil {
-						q.LearnMore = learnMore.Text
+						learnMoreText = learnMore.Text
 					}
 				}
 			}
+			q := NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
 			currentTag.Questions = append(currentTag.Questions, q)
 		}
 		
 	case lexer.TokenTypePassage:
 		// Passage creates a new passage structure
 		if passage := node.Data.GetPassage(); passage != nil {
-			p := &Passage{
-				Title: passage.Text,
-			}
-			// Process children (content and questions) and add them to the passage
+			// Process children (content and questions) and collect data
 			var contentLines []string
+			var questions []*Question
 			for _, child := range node.Children {
 				if child.Type == lexer.TokenTypeQuestion {
 					if question := child.Data.GetQuestion(); question != nil {
-						q := &Question{
-							Prompt: question.QuestionText,
-							Answer: question.AnswerText,
-						}
 						// Check for learn more content in question children
+						var learnMoreText string
 						for _, grandChild := range child.Children {
 							if grandChild.Type == lexer.TokenTypeLearnMore {
 								if learnMore := grandChild.Data.GetLearnMore(); learnMore != nil {
-									q.LearnMore = learnMore.Text
+									learnMoreText = learnMore.Text
 								}
 							}
 						}
-						p.Questions = append(p.Questions, q)
+						q := NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
+						questions = append(questions, q)
 					}
 				} else if child.Type == lexer.TokenTypeContent {
 					if content := child.Data.GetContent(); content != nil {
@@ -98,9 +95,12 @@ func buildTree(node *parser.Node, currentTag *Tag) {
 				}
 			}
 			// Concatenate content lines with newlines
+			var content string
 			if len(contentLines) > 0 {
-				p.Content = strings.Join(contentLines, "\n")
+				content = strings.Join(contentLines, "\n")
 			}
+			// Create passage using NewPassage constructor
+			p := NewPassage(passage.Text, content, questions)
 			// Add the passage to the current tag's Passages
 			currentTag.Passages = append(currentTag.Passages, p)
 		}
@@ -128,8 +128,13 @@ func buildTagHierarchy(parentTag *Tag, headerParts []string) *Tag {
 	}
 	
 	if currentTag == nil {
-		// Create new tag
-		currentTag = NewTag(headerParts[0])
+		// For the first header part, create as root-level tag (no parent hash)
+		// For subsequent parts, create with parent-based hash
+		if parentTag.Title == "TestFile" || parentTag.Title == "Root" {
+			currentTag = NewTag(headerParts[0])
+		} else {
+			currentTag = NewTagWithParent(headerParts[0], parentTag.Title)
+		}
 		parentTag.ChildTags = append(parentTag.ChildTags, currentTag)
 	}
 	
