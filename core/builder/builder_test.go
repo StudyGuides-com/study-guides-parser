@@ -992,10 +992,9 @@ func TestTagHashGeneration(t *testing.T) {
 	// Build the tree
 	tree := Build(ast, ast.Metadata)
 
-	// Verify root hash
-	expectedRootHash := idgen.HashFrom("TestFile")
-	if tree.Root.Hash != expectedRootHash {
-		t.Errorf("Root hash mismatch. Expected '%s', got '%s'", expectedRootHash, tree.Root.Hash)
+	// Verify root title (no hash expected)
+	if tree.Root.Title != "TestFile" {
+		t.Errorf("Root title mismatch. Expected 'TestFile', got '%s'", tree.Root.Title)
 	}
 
 	// Verify TagA hash (should be hash of just "TagA" since it's the first part)
@@ -1021,18 +1020,17 @@ func TestTagHashGeneration(t *testing.T) {
 
 	// Verify that hashes are unique
 	hashes := map[string]string{
-		tree.Root.Hash: "Root",
-		tagA.Hash:      "TagA",
-		tagB.Hash:      "TagB",
-		tagC.Hash:      "TagC",
+		tagA.Hash: "TagA",
+		tagB.Hash: "TagB",
+		tagC.Hash: "TagC",
 	}
 
-	if len(hashes) != 4 {
-		t.Error("Expected 4 unique hashes, but some hashes are duplicated")
+	if len(hashes) != 3 {
+		t.Error("Expected 3 unique hashes, but some hashes are duplicated")
 	}
 
 	// Print the hashes for debugging
-	t.Logf("Root hash: %s", tree.Root.Hash)
+	t.Logf("Root title: %s", tree.Root.Title)
 	t.Logf("TagA hash: %s", tagA.Hash)
 	t.Logf("TagB hash: %s", tagB.Hash)
 	t.Logf("TagC hash: %s", tagC.Hash)

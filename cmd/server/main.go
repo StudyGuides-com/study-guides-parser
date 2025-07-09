@@ -22,6 +22,7 @@ func main() {
 	r.POST("/preparse", handlePreparse)
 	r.POST("/parse", handleParse)
 	r.POST("/build", handleBuild)
+	r.POST("/hash", handleHash)
 
 	port := ":8000"
 	log.Printf("Starting development server on http://localhost%s", port)

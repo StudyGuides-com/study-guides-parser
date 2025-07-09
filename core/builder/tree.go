@@ -6,15 +6,41 @@ import (
 )
 
 type Tree struct {
-	Root *Tag `json:"root"`
+	Root *Root `json:"root"`
 	Metadata *config.Metadata `json:"metadata"`
 }
 
 func NewTree(metadata *config.Metadata) *Tree {
 	return &Tree{
 		Metadata: metadata,
-		Root: NewTag("Root"),
+		Root: NewRoot(),
 	}
+}
+
+// TagContainer interface for types that can contain child tags
+type TagContainer interface {
+	GetChildTags() []*Tag
+	AddChildTag(*Tag)
+}
+
+// Root represents the file-level container, not an actual content tag
+type Root struct {
+	Title    string `json:"title"`
+	ChildTags []*Tag `json:"child_tags,omitempty"`
+}
+
+func NewRoot() *Root {
+	return &Root{
+		Title: "Root",
+	}
+}
+
+func (r *Root) GetChildTags() []*Tag {
+	return r.ChildTags
+}
+
+func (r *Root) AddChildTag(tag *Tag) {
+	r.ChildTags = append(r.ChildTags, tag)
 }
 
 type Passage struct {
@@ -73,5 +99,13 @@ func NewTagWithParent(title string, parentTitle string) *Tag {
 		Title: title,
 		Hash:  idgen.HashFrom(parentTitle + title),
 	}
+}
+
+func (t *Tag) GetChildTags() []*Tag {
+	return t.ChildTags
+}
+
+func (t *Tag) AddChildTag(tag *Tag) {
+	t.ChildTags = append(t.ChildTags, tag)
 }
 

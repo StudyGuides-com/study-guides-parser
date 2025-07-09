@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/studyguides-com/study-guides-parser/core/config"
-	"github.com/studyguides-com/study-guides-parser/core/idgen"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 )
@@ -22,7 +21,7 @@ func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *Tree {
 	return tree
 }
 
-func buildTree(node *parser.Node, currentTag *Tag) {
+func buildTree(node *parser.Node, currentTag TagContainer) {
 	if node == nil {
 		return
 	}
@@ -31,9 +30,9 @@ func buildTree(node *parser.Node, currentTag *Tag) {
 	case lexer.TokenTypeFileHeader:
 		// File header contains the overall title
 		if fileHeader := node.Data.GetFileHeader(); fileHeader != nil {
-			currentTag.Title = fileHeader.Title
-			// Update hash for root tag based on new title
-			currentTag.Hash = idgen.HashFrom(fileHeader.Title)
+			if root, ok := currentTag.(*Root); ok {
+				root.Title = fileHeader.Title
+			}
 		}
 		// Process children
 		for _, child := range node.Children {
@@ -64,7 +63,9 @@ func buildTree(node *parser.Node, currentTag *Tag) {
 				}
 			}
 			q := NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
-			currentTag.Questions = append(currentTag.Questions, q)
+			if tag, ok := currentTag.(*Tag); ok {
+				tag.Questions = append(tag.Questions, q)
+			}
 		}
 		
 	case lexer.TokenTypePassage:
@@ -102,7 +103,9 @@ func buildTree(node *parser.Node, currentTag *Tag) {
 			// Create passage using NewPassage constructor
 			p := NewPassage(passage.Text, content, questions)
 			// Add the passage to the current tag's Passages
-			currentTag.Passages = append(currentTag.Passages, p)
+			if tag, ok := currentTag.(*Tag); ok {
+				tag.Passages = append(tag.Passages, p)
+			}
 		}
 		
 	default:
@@ -113,14 +116,17 @@ func buildTree(node *parser.Node, currentTag *Tag) {
 	}
 }
 
-func buildTagHierarchy(parentTag *Tag, headerParts []string) *Tag {
+func buildTagHierarchy(parentTag TagContainer, headerParts []string) *Tag {
 	if len(headerParts) == 0 {
-		return parentTag
+		if tag, ok := parentTag.(*Tag); ok {
+			return tag
+		}
+		return nil
 	}
 	
 	// Find or create the tag for the first part
 	var currentTag *Tag
-	for _, child := range parentTag.ChildTags {
+	for _, child := range parentTag.GetChildTags() {
 		if child.Title == headerParts[0] {
 			currentTag = child
 			break
@@ -130,12 +136,19 @@ func buildTagHierarchy(parentTag *Tag, headerParts []string) *Tag {
 	if currentTag == nil {
 		// For the first header part, create as root-level tag (no parent hash)
 		// For subsequent parts, create with parent-based hash
-		if parentTag.Title == "TestFile" || parentTag.Title == "Root" {
+		var parentTitle string
+		if root, ok := parentTag.(*Root); ok {
+			parentTitle = root.Title
+		} else if tag, ok := parentTag.(*Tag); ok {
+			parentTitle = tag.Title
+		}
+		
+		if parentTitle == "TestFile" || parentTitle == "Root" {
 			currentTag = NewTag(headerParts[0])
 		} else {
-			currentTag = NewTagWithParent(headerParts[0], parentTag.Title)
+			currentTag = NewTagWithParent(headerParts[0], parentTitle)
 		}
-		parentTag.ChildTags = append(parentTag.ChildTags, currentTag)
+		parentTag.AddChildTag(currentTag)
 	}
 	
 	// Recursively build the rest of the hierarchy

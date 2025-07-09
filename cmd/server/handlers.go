@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/studyguides-com/study-guides-parser/core/config"
+	"github.com/studyguides-com/study-guides-parser/core/idgen"
 	"github.com/studyguides-com/study-guides-parser/core/processor"
 )
 
@@ -18,6 +19,14 @@ type ParseResponse struct {
 	AST     interface{}                 `json:"ast,omitempty"`
 	Errors  []processor.ProcessingError `json:"errors,omitempty"`
 	Tree    interface{}                 `json:"tree,omitempty"`
+}
+
+type HashRequest struct {
+	Value string `json:"value" binding:"required"`
+}
+
+type HashResponse struct {
+	Hash string `json:"hash"`
 }
 
 func handleHome(c *gin.Context) {
@@ -124,4 +133,14 @@ func handleBuild(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+func handleHash(c *gin.Context) {
+	var req HashRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid JSON: " + err.Error()})
+		return
+	}
+	hash := idgen.HashFrom(req.Value)
+	c.JSON(200, HashResponse{Hash: hash})
 } 

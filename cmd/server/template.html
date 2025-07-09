@@ -160,6 +160,26 @@
         <button onclick="buildContent()">Build</button>
         <button onclick="clearResults()">Clear Results</button>
       </div>
+      <!-- Hash Troubleshooter -->
+      <div class="form-group" style="margin-top: 30px">
+        <label for="hash-input">Hash Troubleshooter:</label>
+        <input
+          type="text"
+          id="hash-input"
+          placeholder="Enter value to hash..."
+          style="
+            width: 300px;
+            padding: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+          "
+        />
+        <button onclick="hashValue()">Hash</button>
+        <span
+          id="hash-result"
+          style="margin-left: 20px; font-family: monospace; color: #007bff"
+        ></span>
+      </div>
       <div class="results" id="results"></div>
     </div>
     <script>
@@ -334,6 +354,37 @@
         const textarea = document.getElementById("content");
         const lineNumbers = document.getElementById("line-numbers");
         lineNumbers.scrollTop = textarea.scrollTop;
+      }
+
+      function hashValue() {
+        const value = document.getElementById("hash-input").value;
+        if (!value.trim()) {
+          document.getElementById("hash-result").textContent = "";
+          alert("Please enter a value to hash.");
+          return;
+        }
+        document.getElementById("hash-result").textContent = "Hashing...";
+        fetch("/hash", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value: value }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.hash) {
+              document.getElementById("hash-result").textContent = data.hash;
+            } else if (data.error) {
+              document.getElementById("hash-result").textContent =
+                "Error: " + data.error;
+            } else {
+              document.getElementById("hash-result").textContent =
+                "Unknown error.";
+            }
+          })
+          .catch((error) => {
+            document.getElementById("hash-result").textContent =
+              "Error: " + error.message;
+          });
       }
 
       // Initialize line numbers on page load
