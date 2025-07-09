@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/studyguides-com/study-guides-parser/core/builder"
 	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
@@ -34,15 +35,21 @@ type PreparserOutput struct {
 	Success  bool                       `json:"success"`
 }
 
-// ParseResult represents the result of parsing with structured errors
-type ParseResult struct {
+// ParserOutput represents the result of parsing with structured errors
+type ParserOutput struct {
 	AST    *parser.AbstractSyntaxTree `json:"ast,omitempty"`
 	Errors []ProcessingError          `json:"errors,omitempty"`
 	Success bool                      `json:"success"`
 }
 
+type BuilderOutput struct {
+	Tree *builder.Tree `json:"tree,omitempty"`
+	Errors []ProcessingError          `json:"errors,omitempty"`
+	Success bool                      `json:"success"`
+}
+
 // ParseFile reads a file and parses it into an Abstract Syntax Tree
-func ParseFile(filename string, metadata *config.Metadata) (*ParseResult, error) {
+func ParseFile(filename string, metadata *config.Metadata) (*ParserOutput, error) {
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %s: %w", filename, err)
@@ -52,13 +59,13 @@ func ParseFile(filename string, metadata *config.Metadata) (*ParseResult, error)
 }
 
 // Parse parses a slice of strings into an Abstract Syntax Tree
-func Parse(lines []string, metadata *config.Metadata) (*ParseResult, error) {
+func Parse(lines []string, metadata *config.Metadata) (*ParserOutput, error) {
 	preOut, err := Preparse(lines)
 	if err != nil {
 		return nil, fmt.Errorf("preparser error: %w", err)
 	}
 	if !preOut.Success {
-		return &ParseResult{
+		return &ParserOutput{
 			Errors:  preOut.Errors,
 			Success: false,
 		}, nil
@@ -68,10 +75,10 @@ func Parse(lines []string, metadata *config.Metadata) (*ParseResult, error) {
 }
 
 // ParseFromPreparse takes preparser output and runs the parser on it
-func ParseFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*ParseResult, error) {
+func ParseFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*ParserOutput, error) {
 	// If preparser failed, return immediately with preparser errors
 	if !preOut.Success {
-		return &ParseResult{
+		return &ParserOutput{
 			Errors:  preOut.Errors,
 			Success: false,
 		}, nil
@@ -88,12 +95,12 @@ func ParseFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Pars
 			Text:       parserErr.LineInfo.Text,
 			Type:       string(parserErr.LineInfo.Type),
 		}
-		return &ParseResult{
+		return &ParserOutput{
 			Errors:  []ProcessingError{parserError},
 			Success: false,
 		}, nil
 	}
-	return &ParseResult{
+	return &ParserOutput{
 		AST:     ast,
 		Success: true,
 	}, nil
@@ -189,4 +196,49 @@ func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
 	}, nil
 }
 
+func Build( lines []string, metadata *config.Metadata) (*BuilderOutput, error) {
+	preOut, err := Preparse(lines)
+	if err != nil {
+		return nil, fmt.Errorf("preparser error: %w", err)
+	}
+	if !preOut.Success {
+		return &BuilderOutput{
+			Errors:  preOut.Errors,
+			Success: false,
+		}, nil
+	}
 
+	return BuildFromPreparse(preOut, metadata)
+}
+
+// BuildFromPreparse takes preparser output and runs the full build pipeline
+func BuildFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*BuilderOutput, error) {
+	// If preparser failed, return immediately with preparser errors
+	if !preOut.Success {
+		return &BuilderOutput{
+			Errors:  preOut.Errors,
+			Success: false,
+		}, nil
+	}
+
+	parserOut, err := ParseFromPreparse(preOut, metadata)
+	if err != nil {
+		return nil, fmt.Errorf("parser error: %w", err)
+	}
+	if !parserOut.Success {
+		return &BuilderOutput{
+			Errors:  parserOut.Errors,
+			Success: false,
+		}, nil
+	}
+
+	return BuildFromParse(parserOut, metadata)
+}
+
+func BuildFromParse(p *ParserOutput, metadata *config.Metadata) (*BuilderOutput, error) {
+	tree := builder.Build(p.AST, metadata)
+	return &BuilderOutput{
+		Tree: tree,
+		Success: true,
+	}, nil
+}

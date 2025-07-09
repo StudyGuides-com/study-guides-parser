@@ -114,9 +114,48 @@ func (p *Parser) Parse(metadata *config.Metadata) (*AbstractSyntaxTree, *ParserE
 			p.Current = node
 
 		case lexer.TokenTypeContent:
-			// Add the content under the current passage
-			if err := p.addUnderCurrent(lexer.TokenTypePassage, line); err != nil {
-				return nil, err
+			// Check if we're currently inside a passage context
+			passageParent := p.findNearest(lexer.TokenTypePassage)
+			if passageParent != nil && p.Current != nil {
+				// Check if the current node is a descendant of the passage
+				current := p.Current
+				isInsidePassage := false
+				for current != nil {
+					if current == passageParent {
+						isInsidePassage = true
+						break
+					}
+					current = current.Parent
+				}
+				
+				if isInsidePassage {
+					// We're inside a passage, add content as child of the passage
+					node := &Node{
+						Type:     lexer.TokenTypeContent,
+						Data:     line.ParsedValue,
+						Children: []*Node{},
+						Parent:   passageParent,
+					}
+					passageParent.Children = append(passageParent.Children, node)
+				} else {
+					// We're not inside a passage, add content as child of the current context
+					node := &Node{
+						Type:     lexer.TokenTypeContent,
+						Data:     line.ParsedValue,
+						Children: []*Node{},
+						Parent:   p.Current,
+					}
+					p.Current.Children = append(p.Current.Children, node)
+				}
+			} else {
+				// No passage found, add to current context
+				node := &Node{
+					Type:     lexer.TokenTypeContent,
+					Data:     line.ParsedValue,
+					Children: []*Node{},
+					Parent:   p.Current,
+				}
+				p.Current.Children = append(p.Current.Children, node)
 			}
 
 		// Question
