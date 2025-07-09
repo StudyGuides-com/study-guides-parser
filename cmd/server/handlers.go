@@ -1,17 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/processor"
 )
 
 type ParseRequest struct {
-	Content string `json:"content"`
+	Content string `json:"content" binding:"required"`
 }
 
 type ParseResponse struct {
@@ -21,35 +20,24 @@ type ParseResponse struct {
 	Tree    interface{}                 `json:"tree,omitempty"`
 }
 
-func handleHome(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-	err := homeTemplate.Execute(w, nil)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+func handleHome(c *gin.Context) {
+	c.HTML(http.StatusOK, "template.html", gin.H{})
 }
 
-func handleLex(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+func handleLex(c *gin.Context) {
 	var req ParseRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
 		return
 	}
 
 	lines := strings.Split(req.Content, "\n")
 	result, err := processor.Lex(lines)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Lexing error: %v", err), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lexing error: " + err.Error()})
 		return
 	}
+
 	response := ParseResponse{
 		Success: result.Success,
 		Errors:  result.Errors,
@@ -57,26 +45,24 @@ func handleLex(w http.ResponseWriter, r *http.Request) {
 	if result.Success {
 		response.AST = result.Tokens
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+
+	c.JSON(http.StatusOK, response)
 }
 
-func handlePreparse(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func handlePreparse(c *gin.Context) {
 	var req ParseRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
 		return
 	}
+
 	lines := strings.Split(req.Content, "\n")
 	result, err := processor.Preparse(lines)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Preparsing error: %v", err), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Preparsing error: " + err.Error()})
 		return
 	}
+
 	response := ParseResponse{
 		Success: result.Success,
 		Errors:  result.Errors,
@@ -84,27 +70,25 @@ func handlePreparse(w http.ResponseWriter, r *http.Request) {
 	if result.Success {
 		response.AST = result.Tokens
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+
+	c.JSON(http.StatusOK, response)
 }
 
-func handleParse(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func handleParse(c *gin.Context) {
 	var req ParseRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
 		return
 	}
+
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetaData("colleges")
 	result, err := processor.Parse(lines, metadata)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Parsing error: %v", err), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Parsing error: " + err.Error()})
 		return
 	}
+
 	response := ParseResponse{
 		Success: result.Success,
 		Errors:  result.Errors,
@@ -112,27 +96,25 @@ func handleParse(w http.ResponseWriter, r *http.Request) {
 	if result.Success && result.AST != nil {
 		response.AST = result.AST
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+
+	c.JSON(http.StatusOK, response)
 }
 
-func handleBuild(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func handleBuild(c *gin.Context) {
 	var req ParseRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
 		return
 	}
+
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetaData("colleges")
 	result, err := processor.Build(lines, metadata)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Build error: %v", err), http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Build error: " + err.Error()})
 		return
 	}
+
 	response := ParseResponse{
 		Success: result.Success,
 		Errors:  result.Errors,
@@ -140,6 +122,6 @@ func handleBuild(w http.ResponseWriter, r *http.Request) {
 	if result.Success && result.Tree != nil {
 		response.Tree = result.Tree
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+
+	c.JSON(http.StatusOK, response)
 } 

@@ -45,6 +45,8 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         overflow: hidden;
+        height: 750px; /* ~50 lines at 1.5 line-height and 14px font */
+        max-height: 750px;
       }
       .line-numbers {
         background: #f8f9fa;
@@ -58,7 +60,8 @@
         min-width: 40px;
         line-height: 1.5;
         white-space: pre;
-        overflow: hidden;
+        overflow-y: auto;
+        height: 100%;
         box-sizing: border-box;
       }
       .editor-textarea {
@@ -68,10 +71,12 @@
         font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
         font-size: 14px;
         line-height: 1.5;
-        resize: vertical;
-        min-height: 300px;
+        resize: none;
+        min-height: 100%;
+        height: 100%;
         outline: none;
         box-sizing: border-box;
+        overflow-y: auto;
       }
       button {
         background: #007bff;
@@ -125,6 +130,15 @@
         <strong>⚠️ Development Only:</strong> This server is for testing and
         development purposes only. Do not expose to clients or production
         environments.
+      </div>
+      <div class="form-group">
+        <label for="file-upload">Upload Study Guide File:</label>
+        <input
+          type="file"
+          id="file-upload"
+          accept=".txt"
+          onchange="loadFileToTextarea(event)"
+        />
       </div>
       <div class="form-group">
         <label for="content">Study Guide Content:</label>
@@ -289,6 +303,19 @@
       }
       function clearResults() {
         document.getElementById("results").innerHTML = "";
+      }
+
+      function loadFileToTextarea(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const text = e.target.result;
+          const textarea = document.getElementById("content");
+          textarea.value = text;
+          updateLineNumbers();
+        };
+        reader.readAsText(file);
       }
 
       function updateLineNumbers() {
