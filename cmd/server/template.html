@@ -40,18 +40,38 @@
         font-weight: 600;
         color: #555;
       }
-      select,
-      textarea {
-        width: 100%;
-        padding: 10px;
+      .editor-container {
+        display: flex;
         border: 1px solid #ddd;
         border-radius: 4px;
+        overflow: hidden;
+      }
+      .line-numbers {
+        background: #f8f9fa;
+        border-right: 1px solid #ddd;
+        padding: 10px 8px;
         font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
         font-size: 14px;
+        color: #6c757d;
+        text-align: right;
+        user-select: none;
+        min-width: 40px;
+        line-height: 1.5;
+        white-space: pre;
+        overflow: hidden;
+        box-sizing: border-box;
       }
-      textarea {
-        min-height: 300px;
+      .editor-textarea {
+        flex: 1;
+        border: none;
+        padding: 10px;
+        font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+        font-size: 14px;
+        line-height: 1.5;
         resize: vertical;
+        min-height: 300px;
+        outline: none;
+        box-sizing: border-box;
       }
       button {
         background: #007bff;
@@ -108,10 +128,16 @@
       </div>
       <div class="form-group">
         <label for="content">Study Guide Content:</label>
-        <textarea
-          id="content"
-          placeholder="Paste your study guide content here..."
-        ></textarea>
+        <div class="editor-container">
+          <div class="line-numbers" id="line-numbers">1</div>
+          <textarea
+            id="content"
+            class="editor-textarea"
+            placeholder="Paste your study guide content here..."
+            oninput="updateLineNumbers()"
+            onscroll="syncScroll()"
+          ></textarea>
+        </div>
       </div>
       <div class="form-group">
         <button onclick="lexContent()">Lex</button>
@@ -264,6 +290,29 @@
       function clearResults() {
         document.getElementById("results").innerHTML = "";
       }
+
+      function updateLineNumbers() {
+        const textarea = document.getElementById("content");
+        const lineNumbers = document.getElementById("line-numbers");
+        const lines = textarea.value.split("\n");
+
+        let numbers = "";
+        for (let i = 1; i <= lines.length; i++) {
+          numbers += i + "\n";
+        }
+        lineNumbers.textContent = numbers;
+      }
+
+      function syncScroll() {
+        const textarea = document.getElementById("content");
+        const lineNumbers = document.getElementById("line-numbers");
+        lineNumbers.scrollTop = textarea.scrollTop;
+      }
+
+      // Initialize line numbers on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        updateLineNumbers();
+      });
     </script>
   </body>
 </html>
