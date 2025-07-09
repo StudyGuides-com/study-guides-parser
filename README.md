@@ -226,6 +226,30 @@ go build ./...
 go test ./...
 ```
 
+### Development Server
+
+For easy testing and development, a web server is included:
+
+```bash
+# Option 1: Using make
+make server
+
+# Option 2: Using the script
+./scripts/dev-server.sh
+
+# Option 3: Direct command
+go run cmd/server/main.go
+```
+
+The server will start on `http://localhost:8000` and provides:
+
+- Web interface for testing parsing
+- Pre-loaded examples for each parser type
+- Real-time parsing results
+- API endpoints for programmatic access
+
+**⚠️ Development Only**: This server is for testing purposes only. Do not expose to clients or production environments.
+
 ### Running Examples
 
 ```bash

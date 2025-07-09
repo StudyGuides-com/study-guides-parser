@@ -1,4 +1,4 @@
-.PHONY: fmt test build clean
+.PHONY: fmt test build clean server
 
 # Format Go code
 fmt:
@@ -14,4 +14,8 @@ build:
 
 # Clean build artifacts
 clean:
-	go clean ./... 
+	go clean ./...
+
+# Run development server (recommended for local testing)
+server: build
+	go run ./cmd/server 
