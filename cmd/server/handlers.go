@@ -143,4 +143,4 @@ func handleHash(c *gin.Context) {
 	}
 	hash := idgen.HashFrom(req.Value)
 	c.JSON(200, HashResponse{Hash: hash})
-} 
+}

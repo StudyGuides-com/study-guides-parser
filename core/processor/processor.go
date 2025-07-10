@@ -22,30 +22,30 @@ type ProcessingError struct {
 }
 
 type LexerOutput struct {
-	Filename string        `json:"filename"`
-	Tokens   []lexer.LineInfo `json:"tokens"`
+	Filename string            `json:"filename"`
+	Tokens   []lexer.LineInfo  `json:"tokens"`
 	Errors   []ProcessingError `json:"errors"`
-	Success  bool          `json:"success"`
+	Success  bool              `json:"success"`
 }
 
 type PreparserOutput struct {
-	Filename string                      `json:"filename"`
+	Filename string                     `json:"filename"`
 	Tokens   []preparser.ParsedLineInfo `json:"tokens"`
-	Errors   []ProcessingError           `json:"errors"`
+	Errors   []ProcessingError          `json:"errors"`
 	Success  bool                       `json:"success"`
 }
 
 // ParserOutput represents the result of parsing with structured errors
 type ParserOutput struct {
-	AST    *parser.AbstractSyntaxTree `json:"ast,omitempty"`
-	Errors []ProcessingError          `json:"errors,omitempty"`
-	Success bool                      `json:"success"`
+	AST     *parser.AbstractSyntaxTree `json:"ast,omitempty"`
+	Errors  []ProcessingError          `json:"errors,omitempty"`
+	Success bool                       `json:"success"`
 }
 
 type BuilderOutput struct {
-	Tree *builder.Tree `json:"tree,omitempty"`
-	Errors []ProcessingError          `json:"errors,omitempty"`
-	Success bool                      `json:"success"`
+	Tree    *builder.Tree     `json:"tree,omitempty"`
+	Errors  []ProcessingError `json:"errors,omitempty"`
+	Success bool              `json:"success"`
 }
 
 // ParseFile reads a file and parses it into an Abstract Syntax Tree
@@ -176,7 +176,7 @@ func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
 	// Run preparser on the lexer tokens
 	pre := preparser.NewPreparser(lexOut.Tokens, "")
 	parsed, prepErrors := pre.Parse()
-	
+
 	// Add all preparser errors if any, including line numbers
 	var allErrors []ProcessingError
 	for _, prepErr := range prepErrors {
@@ -188,7 +188,7 @@ func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
 			Type:       string(prepErr.LineInfo.Type),
 		})
 	}
-	
+
 	return PreparserOutput{
 		Tokens:  parsed,
 		Errors:  allErrors,
@@ -196,7 +196,7 @@ func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
 	}, nil
 }
 
-func Build( lines []string, metadata *config.Metadata) (*BuilderOutput, error) {
+func Build(lines []string, metadata *config.Metadata) (*BuilderOutput, error) {
 	preOut, err := Preparse(lines)
 	if err != nil {
 		return nil, fmt.Errorf("preparser error: %w", err)
@@ -238,7 +238,7 @@ func BuildFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Buil
 func BuildFromParse(p *ParserOutput, metadata *config.Metadata) (*BuilderOutput, error) {
 	tree := builder.Build(p.AST, metadata)
 	return &BuilderOutput{
-		Tree: tree,
+		Tree:    tree,
 		Success: true,
 	}, nil
 }

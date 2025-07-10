@@ -10,10 +10,10 @@ import (
 
 func TestParse(t *testing.T) {
 	tests := []struct {
-		name     string
-		lines    []string
-		metadata *config.Metadata
-		wantErr  bool
+		name          string
+		lines         []string
+		metadata      *config.Metadata
+		wantErr       bool
 		wantErrSubstr string
 	}{
 		{
@@ -48,15 +48,15 @@ func TestParse(t *testing.T) {
 				"Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations",
 				"1. What is x? - A variable",
 			},
-			metadata: config.NewMetaData("test_parser"),
-			wantErr:  true,
+			metadata:      config.NewMetaData("test_parser"),
+			wantErr:       true,
 			wantErrSubstr: "file header",
 		},
 		{
-			name:     "empty lines",
-			lines:    []string{},
-			metadata: config.NewMetaData("test_parser"),
-			wantErr:  true,
+			name:          "empty lines",
+			lines:         []string{},
+			metadata:      config.NewMetaData("test_parser"),
+			wantErr:       true,
 			wantErrSubstr: "no lines",
 		},
 	}
@@ -151,25 +151,25 @@ func TestMetadata(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-					metadata := config.NewMetaData(tt.parserType)
-		if metadata.Type != tt.expected {
-			t.Errorf("Metadata Type = %s, want %s", metadata.Type, tt.expected)
-		}
+			metadata := config.NewMetaData(tt.parserType)
+			if metadata.Type != tt.expected {
+				t.Errorf("Metadata Type = %s, want %s", metadata.Type, tt.expected)
+			}
 		})
 	}
 }
 
 func TestMetadataWithOption(t *testing.T) {
 	metadata := config.NewMetaData("test_parser").WithOption("strict", "true").WithOption("debug", "false")
-	
+
 	if metadata.Type != "test_parser" {
 		t.Errorf("Expected parser type 'test_parser', got %s", metadata.Type)
 	}
-	
+
 	if metadata.Options["strict"] != "true" {
 		t.Errorf("Expected option 'strict' to be 'true', got %s", metadata.Options["strict"])
 	}
-	
+
 	if metadata.Options["debug"] != "false" {
 		t.Errorf("Expected option 'debug' to be 'false', got %s", metadata.Options["debug"])
 	}
@@ -178,7 +178,7 @@ func TestMetadataWithOption(t *testing.T) {
 func TestPreparseReturnsOnlyLexerErrors(t *testing.T) {
 	lines := []string{
 		"\x00\x01\x02Invalid binary data", // Should trigger a lexer error
-		"Another line", // Should not be reached by preparser
+		"Another line",                    // Should not be reached by preparser
 	}
 
 	result, err := Preparse(lines)
@@ -207,12 +207,12 @@ func TestPreparseReturnsOnlyLexerErrors(t *testing.T) {
 
 func TestPreparseReturnsOnlyPreparserErrors(t *testing.T) {
 	lines := []string{
-		"Study Guide", // Valid file header
-		"Section: Chapter 1", // Valid header
-		"Learn More: ", // Invalid - empty after colon
-		"1. What is Go? - Answer", // Valid question
+		"Study Guide",                      // Valid file header
+		"Section: Chapter 1",               // Valid header
+		"Learn More: ",                     // Invalid - empty after colon
+		"1. What is Go? - Answer",          // Valid question
 		"Passage: This is a valid passage", // Valid passage
-		"Some content here", // Valid content
+		"Some content here",                // Valid content
 	}
 
 	result, err := Preparse(lines)
@@ -269,4 +269,4 @@ func TestParseFileWithLexerError(t *testing.T) {
 			t.Error("Expected lexer error to be on line 1")
 		}
 	}
-} 
+}

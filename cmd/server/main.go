@@ -27,8 +27,8 @@ func main() {
 	port := ":8000"
 	log.Printf("Starting development server on http://localhost%s", port)
 	log.Println("This server is for development/testing only - do not expose to clients!")
-	
+
 	if err := r.Run(port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
-} 
+}

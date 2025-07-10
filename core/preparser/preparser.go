@@ -46,7 +46,7 @@ func (p *Preparser) Parse() ([]ParsedLineInfo, []*PreParsingError) {
 		}
 		parsedLines = append(parsedLines, info)
 	}
-	
+
 	return parsedLines, allErrors
 }
 

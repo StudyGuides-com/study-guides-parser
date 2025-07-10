@@ -18,4 +18,4 @@ func NewMetaData(typeName string) *Metadata {
 func (m *Metadata) WithOption(key, value string) *Metadata {
 	m.Options[key] = value
 	return m
-} 
+}

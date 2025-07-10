@@ -127,7 +127,7 @@ func (p *Parser) Parse(metadata *config.Metadata) (*AbstractSyntaxTree, *ParserE
 					}
 					current = current.Parent
 				}
-				
+
 				if isInsidePassage {
 					// We're inside a passage, add content as child of the passage
 					node := &Node{

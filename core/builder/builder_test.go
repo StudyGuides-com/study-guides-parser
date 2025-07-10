@@ -37,7 +37,7 @@ func TestBuildTree(t *testing.T) {
 						Header: &preparser.HeaderResult{
 							Parts: []string{
 								"TagA",
-								"TagB", 
+								"TagB",
 								"TagC",
 								"TagD",
 							},
@@ -260,7 +260,7 @@ func TestBuildTree(t *testing.T) {
 	if p2.Questions[0].Answer != "$10" {
 		t.Errorf("Expected passage answer '$10', got '%s'", p2.Questions[0].Answer)
 	}
-} 
+}
 
 func TestBuildTree_JSONOutput(t *testing.T) {
 	// Use the same AST as in TestBuildTree
@@ -286,7 +286,7 @@ func TestBuildTree_JSONOutput(t *testing.T) {
 						Header: &preparser.HeaderResult{
 							Parts: []string{
 								"TagA",
-								"TagB", 
+								"TagB",
 								"TagC",
 								"TagD",
 							},
@@ -417,7 +417,7 @@ func TestBuildTree_JSONOutput(t *testing.T) {
 	if err := enc.Encode(tree.Root); err != nil {
 		t.Fatalf("Failed to encode tree to JSON: %v", err)
 	}
-} 
+}
 
 func TestActualJSONOutput(t *testing.T) {
 	// Use the same AST as in TestBuildTree
@@ -443,7 +443,7 @@ func TestActualJSONOutput(t *testing.T) {
 						Header: &preparser.HeaderResult{
 							Parts: []string{
 								"TagA",
-								"TagB", 
+								"TagB",
 								"TagC",
 								"TagD",
 							},
@@ -574,7 +574,7 @@ func TestActualJSONOutput(t *testing.T) {
 	if err := enc.Encode(tree.Root); err != nil {
 		t.Fatalf("Failed to encode tree to JSON: %v", err)
 	}
-} 
+}
 
 func TestBuildTreeWithContent(t *testing.T) {
 	// Create the AST based on the user's actual example
@@ -783,7 +783,7 @@ func TestBuildTreeWithContent(t *testing.T) {
 	if len(p2.Questions) != 3 {
 		t.Errorf("Expected 3 questions in second passage, got %d", len(p2.Questions))
 	}
-} 
+}
 
 func TestBuildTreeWithContent_JSONOutput(t *testing.T) {
 	// Create the AST based on the user's actual example
@@ -953,7 +953,7 @@ func TestBuildTreeWithContent_JSONOutput(t *testing.T) {
 		t.Fatalf("Failed to marshal JSON: %v", err)
 	}
 	fmt.Println(string(jsonData))
-} 
+}
 
 func TestTagHashGeneration(t *testing.T) {
 	// Create a simple AST with a header hierarchy
@@ -979,7 +979,7 @@ func TestTagHashGeneration(t *testing.T) {
 						Header: &preparser.HeaderResult{
 							Parts: []string{
 								"TagA",
-								"TagB", 
+								"TagB",
 								"TagC",
 							},
 						},
@@ -1034,4 +1034,4 @@ func TestTagHashGeneration(t *testing.T) {
 	t.Logf("TagA hash: %s", tagA.Hash)
 	t.Logf("TagB hash: %s", tagB.Hash)
 	t.Logf("TagC hash: %s", tagC.Hash)
-} 
+}
