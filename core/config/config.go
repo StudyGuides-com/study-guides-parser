@@ -1,9 +1,12 @@
 package config
 
+import "github.com/studyguides-com/study-guides-parser/core/ontology"
+
 // Metadata contains configuration and metadata for parsing
 type Metadata struct {
-	Type    string            `json:"type"`
-	Options map[string]string `json:"options,omitempty"`
+	Type        string                    `json:"type"`
+	Options     map[string]string         `json:"options,omitempty"`
+	ContextType ontology.ContextType      `json:"context_type,omitempty"`
 }
 
 // NewMetaData creates a new Metadata struct with the given type

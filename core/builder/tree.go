@@ -3,47 +3,7 @@ package builder
 import (
 	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/idgen"
-)
-
-type ContextType string
-
-const (
-	ContextTypeColleges             ContextType = "Colleges"
-	ContextTypeCertifications       ContextType = "Certifications"
-	ContextTypeEntranceExams        ContextType = "EntranceExams"
-	ContextTypeAPExams              ContextType = "APExams"
-	ContextTypeUserGeneratedContent ContextType = "UserGeneratedContent"
-	ContextTypeDoD                  ContextType = "DoD"
-	ContextTypeNone                 ContextType = "None"
-)
-
-type TagType string
-
-const (
-	TagTypeCategory         TagType = "Category"
-	TagTypeSubCategory      TagType = "SubCategory"
-	TagTypeUniversity       TagType = "University"
-	TagTypeRegion           TagType = "Region"
-	TagTypeDepartment       TagType = "Department"
-	TagTypeCourse           TagType = "Course"
-	TagTypeTopic            TagType = "Topic"
-	TagTypeUserFolder       TagType = "UserFolder"
-	TagTypeUserTopic        TagType = "UserTopic"
-	TagTypeCertifyingAgency TagType = "Certifying_Agency"
-	TagTypeCertification    TagType = "Certification"
-	TagTypeDomain           TagType = "Domain"
-	TagTypeModule           TagType = "Module"
-	TagTypeEntranceExam     TagType = "Entrance_Exam"
-	TagTypeAPExam           TagType = "AP_Exam"
-	TagTypeUserContent      TagType = "UserContent"
-	TagTypeBranch           TagType = "Branch"
-	TagTypeInstructionType  TagType = "Instruction_Type"
-	TagTypeInstructionGroup TagType = "Instruction_Group"
-	TagTypeInstruction      TagType = "Instruction"
-	TagTypeChapter          TagType = "Chapter"
-	TagTypeSection          TagType = "Section"
-	TagTypePart             TagType = "Part"
-	TagTypeNone             TagType = "None"
+	"github.com/studyguides-com/study-guides-parser/core/ontology"
 )
 
 type Tree struct {
@@ -62,6 +22,14 @@ func NewTree(metadata *config.Metadata) *Tree {
 type TagContainer interface {
 	GetChildTags() []*Tag
 	AddChildTag(*Tag)
+}
+
+// TagTypeAssignable interface for tags that can have their types assigned
+type TagTypeAssignable interface {
+	SetTagType(tagType ontology.TagType)
+	SetContext(contextType ontology.ContextType)
+	GetTagType() ontology.TagType
+	GetContext() ontology.ContextType
 }
 
 // Root represents the file-level container, not an actual content tag
@@ -119,14 +87,14 @@ func NewQuestion(prompt string, answer string, distractor []string, learnMore st
 }
 
 type Tag struct {
-	Title     string      `json:"title"`
-	TagType   TagType     `json:"tag_type,omitempty"`
-	InsertID  string      `json:"insert_id,omitempty"`
-	Context   ContextType `json:"context,omitempty"`
-	Hash      string      `json:"hash,omitempty"`
-	Questions []*Question `json:"questions,omitempty"`
-	Passages  []*Passage  `json:"passages,omitempty"`
-	ChildTags []*Tag      `json:"child_tags,omitempty"`
+	Title     string              `json:"title"`
+	TagType   ontology.TagType    `json:"tag_type,omitempty"`
+	InsertID  string              `json:"insert_id,omitempty"`
+	Context   ontology.ContextType `json:"context,omitempty"`
+	Hash      string              `json:"hash,omitempty"`
+	Questions []*Question         `json:"questions,omitempty"`
+	Passages  []*Passage          `json:"passages,omitempty"`
+	ChildTags []*Tag              `json:"child_tags,omitempty"`
 }
 
 func NewTag(title string) *Tag {
@@ -134,8 +102,8 @@ func NewTag(title string) *Tag {
 		InsertID: idgen.NewCUID(),
 		Title:    title,
 		Hash:     idgen.HashFrom(title),
-		TagType:  TagTypeNone,
-		Context:  ContextTypeNone,
+		TagType:  ontology.TagTypeNone,
+		Context:  ontology.ContextTypeNone,
 	}
 }
 
@@ -145,8 +113,8 @@ func NewTagWithParent(title string, parentTitle string) *Tag {
 		InsertID: idgen.NewCUID(),
 		Title:    title,
 		Hash:     idgen.HashFrom(parentTitle + title),
-		TagType:  TagTypeNone,
-		Context:  ContextTypeNone,
+		TagType:  ontology.TagTypeNone,
+		Context:  ontology.ContextTypeNone,
 	}
 }
 
@@ -156,4 +124,148 @@ func (t *Tag) GetChildTags() []*Tag {
 
 func (t *Tag) AddChildTag(tag *Tag) {
 	t.ChildTags = append(t.ChildTags, tag)
+}
+
+// SetTagType sets the tag type
+func (t *Tag) SetTagType(tagType ontology.TagType) {
+	t.TagType = tagType
+}
+
+// SetContext sets the context type
+func (t *Tag) SetContext(contextType ontology.ContextType) {
+	t.Context = contextType
+}
+
+// GetTagType returns the current tag type
+func (t *Tag) GetTagType() ontology.TagType {
+	return t.TagType
+}
+
+// GetContext returns the current context type
+func (t *Tag) GetContext() ontology.ContextType {
+	return t.Context
+}
+
+// TreeTraverser defines the interface for traversing tree structures
+type TreeTraverser interface {
+	// Traverse performs a depth-first traversal of the tree
+	// The visitor function is called for each tag with its depth
+	Traverse(visitor func(TagTypeAssignable, int))
+	
+	// TraverseWithContext performs traversal with additional context
+	TraverseWithContext(visitor func(TagTypeAssignable, int, ontology.ContextType))
+}
+
+// TagTypeAssigner defines the interface for assigning tag types
+type TagTypeAssigner interface {
+	AssignTagTypes(contextType ontology.ContextType)
+}
+
+// Traverse implements TreeTraverser interface
+func (t *Tree) Traverse(visitor func(TagTypeAssignable, int)) {
+	if t.Root == nil {
+		return
+	}
+	
+	var traverse func(*Tag, int)
+	traverse = func(tag *Tag, depth int) {
+		if tag == nil {
+			return
+		}
+		
+		// Visit current tag
+		visitor(tag, depth)
+		
+		// Recursively visit children
+		for _, child := range tag.ChildTags {
+			traverse(child, depth+1)
+		}
+	}
+	
+	// Start traversal from root-level tags
+	for _, child := range t.Root.ChildTags {
+		traverse(child, 1)
+	}
+}
+
+// TraverseWithContext implements TreeTraverser interface with context
+func (t *Tree) TraverseWithContext(visitor func(TagTypeAssignable, int, ontology.ContextType)) {
+	if t.Root == nil {
+		return
+	}
+	
+	// Get context from metadata
+	contextType := ontology.ContextTypeNone
+	if t.Metadata != nil {
+		contextType = t.Metadata.ContextType
+	}
+	
+	var traverse func(*Tag, int)
+	traverse = func(tag *Tag, depth int) {
+		if tag == nil {
+			return
+		}
+		
+		// Visit current tag with context
+		visitor(tag, depth, contextType)
+		
+		// Recursively visit children
+		for _, child := range tag.ChildTags {
+			traverse(child, depth+1)
+		}
+	}
+	
+	// Start traversal from root-level tags
+	for _, child := range t.Root.ChildTags {
+		traverse(child, 1)
+	}
+}
+
+// AssignTagTypes implements TagTypeAssigner interface
+func (t *Tree) AssignTagTypes(contextType ontology.ContextType) {
+	// First, determine the maximum depth of the tree
+	maxDepth := t.getMaxDepth()
+	
+	// Find the ontology entry for this total depth
+	tagOntology := ontology.FindTagOntology(contextType, maxDepth)
+	if tagOntology == nil {
+		return // No ontology found for this depth
+	}
+	
+	// Now traverse and assign types based on individual tag depths
+	t.Traverse(func(tag TagTypeAssignable, depth int) {
+		assignTagTypeFromOntology(tag, contextType, depth, tagOntology)
+	})
+}
+
+// getMaxDepth calculates the maximum depth of the tree
+func (t *Tree) getMaxDepth() int {
+	if t.Root == nil {
+		return 0
+	}
+	
+	var maxDepth int
+	var traverse func(*Tag, int)
+	traverse = func(tag *Tag, depth int) {
+		if depth > maxDepth {
+			maxDepth = depth
+		}
+		for _, child := range tag.ChildTags {
+			traverse(child, depth+1)
+		}
+	}
+	
+	for _, child := range t.Root.ChildTags {
+		traverse(child, 1)
+	}
+	
+	return maxDepth
+}
+
+// assignTagTypeFromOntology assigns the appropriate tag type based on context and depth within a known ontology
+func assignTagTypeFromOntology(tag TagTypeAssignable, contextType ontology.ContextType, depth int, tagOntology *ontology.TagOntology) {
+	if depth <= len(tagOntology.TagTypes) {
+		tag.SetTagType(tagOntology.TagTypes[depth-1]) // depth is 1-indexed, slice is 0-indexed
+		tag.SetContext(contextType)
+	}
 }

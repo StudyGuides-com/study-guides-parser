@@ -7,11 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/idgen"
+	"github.com/studyguides-com/study-guides-parser/core/ontology"
 	"github.com/studyguides-com/study-guides-parser/core/processor"
 )
 
 type ParseRequest struct {
-	Content string `json:"content" binding:"required"`
+	Content     string `json:"content" binding:"required"`
+	ContextType string `json:"context_type"`
 }
 
 type ParseResponse struct {
@@ -91,7 +93,14 @@ func handleParse(c *gin.Context) {
 	}
 
 	lines := strings.Split(req.Content, "\n")
-	metadata := config.NewMetaData("colleges")
+	metadata := config.NewMetaData("parse")
+	
+	// Set context type if provided
+	if req.ContextType != "" {
+		contextType := ontology.ContextType(req.ContextType)
+		metadata.ContextType = contextType
+	}
+
 	result, err := processor.Parse(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Parsing error: " + err.Error()})
@@ -117,7 +126,14 @@ func handleBuild(c *gin.Context) {
 	}
 
 	lines := strings.Split(req.Content, "\n")
-	metadata := config.NewMetaData("colleges")
+	metadata := config.NewMetaData("build")
+	
+	// Set context type if provided
+	if req.ContextType != "" {
+		contextType := ontology.ContextType(req.ContextType)
+		metadata.ContextType = contextType
+	}
+
 	result, err := processor.Build(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Build error: " + err.Error()})

@@ -5,6 +5,7 @@ import (
 
 	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
+	"github.com/studyguides-com/study-guides-parser/core/ontology"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 )
 
@@ -17,6 +18,28 @@ func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *Tree {
 
 	// Walk through the AST and build the tree
 	buildTree(ast.Root, tree.Root)
+	
+	// Assign tag types based on context
+	if metadata.ContextType != ontology.ContextTypeNone {
+		tree.AssignTagTypes(metadata.ContextType)
+	}
+
+	return tree
+}
+
+// BuildWithContext builds a tree and requires a context type for tag assignment
+func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata, contextType ontology.ContextType) *Tree {
+	tree := NewTree(metadata)
+
+	if ast.Root == nil {
+		return tree
+	}
+
+	// Walk through the AST and build the tree
+	buildTree(ast.Root, tree.Root)
+	
+	// Assign tag types based on the provided context
+	tree.AssignTagTypes(contextType)
 
 	return tree
 }

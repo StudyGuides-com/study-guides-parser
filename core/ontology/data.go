@@ -1,10 +1,4 @@
-package builder
-
-type TagOntology struct {
-	ContextType  ContextType
-	HeaderLength int
-	TagTypes     []TagType
-}
+package ontology
 
 var tagOntology = []TagOntology{
 	// AP Exams
@@ -167,4 +161,4 @@ var tagOntology = []TagOntology{
 		TagTypeModule,
 		TagTypeTopic,
 	}},
-}
+} 
