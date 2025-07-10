@@ -9,6 +9,7 @@ import (
 type TagQATarget interface {
 	GetTagType() ontology.TagType
 	GetTitle() string
+	GetContext() ontology.ContextType
 }
 
 // TagContainer interface for types that can contain child tags

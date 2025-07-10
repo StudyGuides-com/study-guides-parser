@@ -27,7 +27,10 @@ func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *tree.Tree
 	}
 
 	// Run QA
-	qaRunner := qa.NewTreeQARunner(qa.NewDefaultTreeQA())
+	qaRunner := qa.NewTreeQARunner(
+		qa.NewTagTypeQA(),
+		qa.NewContextTypeQA(),
+	)
 	qaRunner.RunQAAndUpdate(tree)
 
 	return tree
@@ -48,7 +51,10 @@ func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata,
 	tree.AssignTagTypes(contextType)
 
 	// Run QA
-	qaRunner := qa.NewTreeQARunner(qa.NewDefaultTreeQA())
+	qaRunner := qa.NewTreeQARunner(
+		qa.NewTagTypeQA(),
+		qa.NewContextTypeQA(),
+	)
 	qaRunner.RunQAAndUpdate(tree)
 
 	return tree

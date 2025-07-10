@@ -7,14 +7,11 @@ import (
 // TreeQAble defines the interface for types that can be QA'd
 // The visitor function is called for each tag with its depth
 // Traverse must visit all tags in the tree
-// GetWarnings/SetWarnings manage QA warnings
-// GetQAPassed/SetQAPassed manage QA pass/fail status
+// GetQAResults/SetQAResults manage QA results
 type TreeQAble interface {
 	Traverse(visitor func(TagQATarget, int))
-	GetWarnings() []string
-	SetWarnings(warnings []string)
-	GetQAPassed() bool
-	SetQAPassed(passed bool)
+	GetQAResults() QAResults
+	SetQAResults(results QAResults)
 }
 
 // TreeTraverser defines the interface for traversing tree structures

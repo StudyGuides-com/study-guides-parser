@@ -2,10 +2,10 @@ package tree
 
 // Root represents the file-level container, not an actual content tag
 type Root struct {
-	Title     string   `json:"title"`
-	QAPassed  bool     `json:"qa_passed,omitempty"`
-	Warnings  []string `json:"warnings,omitempty"`
-	ChildTags []*Tag   `json:"child_tags,omitempty"`
+	Title     string     `json:"title"`
+	QAResults QAResults  `json:"qa_results,omitempty"`
+	Warnings  []string   `json:"warnings,omitempty"`
+	ChildTags []*Tag     `json:"child_tags,omitempty"`
 }
 
 func NewRoot() *Root {
@@ -32,12 +32,25 @@ func (r *Root) SetWarnings(warnings []string) {
 	r.Warnings = warnings
 }
 
-// GetQAPassed returns whether QA passed
+// GetQAPassed returns whether QA passed (for backward compatibility)
 func (r *Root) GetQAPassed() bool {
-	return r.QAPassed
+	return r.QAResults.OverallPassed
 }
 
-// SetQAPassed sets whether QA passed
+// SetQAPassed sets whether QA passed (for backward compatibility)
 func (r *Root) SetQAPassed(passed bool) {
-	r.QAPassed = passed
+	// For backward compatibility, create a simple QA result
+	qaResults := NewQAResults()
+	qaResults.OverallPassed = passed
+	r.QAResults = qaResults
+}
+
+// GetQAResults returns the QA results
+func (r *Root) GetQAResults() QAResults {
+	return r.QAResults
+}
+
+// SetQAResults sets the QA results
+func (r *Root) SetQAResults(results QAResults) {
+	r.QAResults = results
 } 
