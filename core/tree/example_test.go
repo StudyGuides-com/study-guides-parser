@@ -1,7 +1,8 @@
-package builder
+package tree
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/ontology"
@@ -30,9 +31,25 @@ func Example() {
 	tag3.AddChildTag(tag4)
 	tree.Root.AddChildTag(tag1)
 	
+	// Traverse the tree and print tag information
+	fmt.Println("Tree structure:")
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
+		indent := strings.Repeat("  ", depth-1)
+		fmt.Printf("%s- %s (Type: %s, Context: %s)\n", 
+			indent, tag.(*Tag).Title, tag.GetTagType(), tag.GetContext())
+	})
+
+	// Print the tree as JSON
+	fmt.Println("\nTree as JSON:")
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
+		indent := strings.Repeat("  ", depth-1)
+		fmt.Printf("%s- %s (Type: %s, Context: %s)\n", 
+			indent, tag.(*Tag).Title, tag.GetTagType(), tag.GetContext())
+	})
+	
 	// Demonstrate the TagTypeAssignable interface
 	fmt.Println("Before assignment:")
-	tree.Traverse(func(tag TagTypeAssignable, depth int) {
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		fmt.Printf("  Tag: %s, Depth: %d, Type: %s, Context: %s\n", 
 			tag.(*Tag).Title, depth, tag.GetTagType(), tag.GetContext())
 	})
@@ -41,7 +58,7 @@ func Example() {
 	tree.AssignTagTypes(ontology.ContextTypeCertifications)
 	
 	fmt.Println("\nAfter assignment:")
-	tree.Traverse(func(tag TagTypeAssignable, depth int) {
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		fmt.Printf("  Tag: %s, Depth: %d, Type: %s, Context: %s\n", 
 			tag.(*Tag).Title, depth, tag.GetTagType(), tag.GetContext())
 	})

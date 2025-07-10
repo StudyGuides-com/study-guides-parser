@@ -1,1 +1,3 @@
+# Ignore server binary but not source code
 server
+cmd/server/server

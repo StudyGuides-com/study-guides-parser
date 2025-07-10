@@ -1,4 +1,4 @@
-package builder
+package tree
 
 import (
 	"testing"
@@ -30,7 +30,7 @@ func TestTreeTraversal(t *testing.T) {
 	// Test traversal
 	var visited []string
 	var depths []int
-	tree.Traverse(func(tag TagTypeAssignable, depth int) {
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		visited = append(visited, tag.(*Tag).Title)
 		depths = append(depths, depth)
 	})
@@ -77,16 +77,18 @@ func TestTagTypeAssignment(t *testing.T) {
 
 	// Debug: Print before assignment
 	t.Log("Before assignment:")
-	tree.Traverse(func(tag TagTypeAssignable, depth int) {
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		t.Logf("Tag: %s, Depth: %d, Type: %s, Context: %s", tag.(*Tag).Title, depth, tag.GetTagType(), tag.GetContext())
 	})
 
 	// Assign tag types using the total depth of 4
-	tree.AssignTagTypes(ontology.ContextTypeCertifications)
+	if err := tree.AssignTagTypes(ontology.ContextTypeCertifications); err != nil {
+		t.Fatalf("Failed to assign tag types: %v", err)
+	}
 
 	// Debug: Print after assignment
 	t.Log("After assignment:")
-	tree.Traverse(func(tag TagTypeAssignable, depth int) {
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		t.Logf("Tag: %s, Depth: %d, Type: %s, Context: %s", tag.(*Tag).Title, depth, tag.GetTagType(), tag.GetContext())
 	})
 
@@ -101,7 +103,7 @@ func TestTagTypeAssignment(t *testing.T) {
 
 	// Collect actual tag types in order
 	var actualTypes []ontology.TagType
-	tree.Traverse(func(tag TagTypeAssignable, depth int) {
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		actualTypes = append(actualTypes, tag.GetTagType())
 	})
 
@@ -117,7 +119,7 @@ func TestTagTypeAssignment(t *testing.T) {
 	}
 
 	// Verify context was set
-	tree.Traverse(func(tag TagTypeAssignable, depth int) {
+	tree.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		if tag.GetContext() != ontology.ContextTypeCertifications {
 			t.Errorf("Expected context %s, got %s", ontology.ContextTypeCertifications, tag.GetContext())
 		}
@@ -149,5 +151,32 @@ func TestTraverseWithContext(t *testing.T) {
 		if context != ontology.ContextTypeAPExams {
 			t.Errorf("Expected context %s at position %d, got %s", ontology.ContextTypeAPExams, i, context)
 		}
+	}
+}
+
+func TestAssignTagTypesError(t *testing.T) {
+	// Create a tree with a depth that doesn't exist in the ontology
+	metadata := &config.Metadata{
+		Type:        "test",
+		ContextType: ontology.ContextTypeCertifications,
+	}
+	tree := NewTree(metadata)
+
+	// Add tags with depth 2 structure (which doesn't exist for Certifications)
+	tag1 := NewTag("Category")
+	tag2 := NewTag("Topic")
+
+	tag1.AddChildTag(tag2)
+	tree.Root.AddChildTag(tag1)
+
+	// This should return an error because there's no ontology for Certifications with depth 2
+	err := tree.AssignTagTypes(ontology.ContextTypeCertifications)
+	if err == nil {
+		t.Error("Expected error when no ontology is found, but got nil")
+	}
+
+	expectedError := "no ontology found for context type 'Certifications' with depth 2"
+	if err.Error() != expectedError {
+		t.Errorf("Expected error message '%s', got '%s'", expectedError, err.Error())
 	}
 } 

@@ -324,7 +324,14 @@
             context_type: contextType,
           }),
         })
-          .then((response) => response.json())
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((err) => {
+                throw new Error(err.error || "Parse failed");
+              });
+            }
+            return response.json();
+          })
           .then((data) => {
             displayResults(data, "Parse Results");
           })
@@ -351,7 +358,14 @@
             context_type: contextType,
           }),
         })
-          .then((response) => response.json())
+          .then((response) => {
+            if (!response.ok) {
+              return response.json().then((err) => {
+                throw new Error(err.error || "Build failed");
+              });
+            }
+            return response.json();
+          })
           .then((data) => {
             displayResults(data, "Build Results");
           })

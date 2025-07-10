@@ -10,6 +10,7 @@ import (
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/tree"
 )
 
 // ProcessingError represents a structured error with line information
@@ -43,7 +44,7 @@ type ParserOutput struct {
 }
 
 type BuilderOutput struct {
-	Tree    *builder.Tree     `json:"tree,omitempty"`
+	Tree    *tree.Tree     `json:"tree,omitempty"`
 	Errors  []ProcessingError `json:"errors,omitempty"`
 	Success bool              `json:"success"`
 }

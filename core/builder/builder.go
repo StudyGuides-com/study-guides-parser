@@ -7,10 +7,12 @@ import (
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/ontology"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
+	"github.com/studyguides-com/study-guides-parser/core/qa"
+	"github.com/studyguides-com/study-guides-parser/core/tree"
 )
 
-func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *Tree {
-	tree := NewTree(metadata)
+func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *tree.Tree {
+	tree := tree.NewTree(metadata)
 
 	if ast.Root == nil {
 		return tree
@@ -21,15 +23,19 @@ func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *Tree {
 	
 	// Assign tag types based on context
 	if metadata.ContextType != ontology.ContextTypeNone {
-		tree.AssignTagTypes(metadata.ContextType)
+		_ = tree.AssignTagTypes(metadata.ContextType)
 	}
+
+	// Run QA
+	qaRunner := qa.NewTreeQARunner(qa.NewDefaultTreeQA())
+	qaRunner.RunQAAndUpdate(tree)
 
 	return tree
 }
 
 // BuildWithContext builds a tree and requires a context type for tag assignment
-func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata, contextType ontology.ContextType) *Tree {
-	tree := NewTree(metadata)
+func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata, contextType ontology.ContextType) *tree.Tree {
+	tree := tree.NewTree(metadata)
 
 	if ast.Root == nil {
 		return tree
@@ -41,10 +47,14 @@ func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata,
 	// Assign tag types based on the provided context
 	tree.AssignTagTypes(contextType)
 
+	// Run QA
+	qaRunner := qa.NewTreeQARunner(qa.NewDefaultTreeQA())
+	qaRunner.RunQAAndUpdate(tree)
+
 	return tree
 }
 
-func buildTree(node *parser.Node, currentTag TagContainer) {
+func buildTree(node *parser.Node, currentTag tree.TagContainer) {
 	if node == nil {
 		return
 	}
@@ -53,7 +63,7 @@ func buildTree(node *parser.Node, currentTag TagContainer) {
 	case lexer.TokenTypeFileHeader:
 		// File header contains the overall title
 		if fileHeader := node.Data.GetFileHeader(); fileHeader != nil {
-			if root, ok := currentTag.(*Root); ok {
+			if root, ok := currentTag.(*tree.Root); ok {
 				root.Title = fileHeader.Title
 			}
 		}
@@ -85,8 +95,8 @@ func buildTree(node *parser.Node, currentTag TagContainer) {
 					}
 				}
 			}
-			q := NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
-			if tag, ok := currentTag.(*Tag); ok {
+			q := tree.NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
+			if tag, ok := currentTag.(*tree.Tag); ok {
 				tag.Questions = append(tag.Questions, q)
 			}
 		}
@@ -96,7 +106,7 @@ func buildTree(node *parser.Node, currentTag TagContainer) {
 		if passage := node.Data.GetPassage(); passage != nil {
 			// Process children (content and questions) and collect data
 			var contentLines []string
-			var questions []*Question
+			var questions []*tree.Question
 			for _, child := range node.Children {
 				if child.Type == lexer.TokenTypeQuestion {
 					if question := child.Data.GetQuestion(); question != nil {
@@ -109,7 +119,7 @@ func buildTree(node *parser.Node, currentTag TagContainer) {
 								}
 							}
 						}
-						q := NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
+						q := tree.NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
 						questions = append(questions, q)
 					}
 				} else if child.Type == lexer.TokenTypeContent {
@@ -124,9 +134,9 @@ func buildTree(node *parser.Node, currentTag TagContainer) {
 				content = strings.Join(contentLines, "\n")
 			}
 			// Create passage using NewPassage constructor
-			p := NewPassage(passage.Text, content, questions)
+			p := tree.NewPassage(passage.Text, content, questions)
 			// Add the passage to the current tag's Passages
-			if tag, ok := currentTag.(*Tag); ok {
+			if tag, ok := currentTag.(*tree.Tag); ok {
 				tag.Passages = append(tag.Passages, p)
 			}
 		}
@@ -139,16 +149,16 @@ func buildTree(node *parser.Node, currentTag TagContainer) {
 	}
 }
 
-func buildTagHierarchy(parentTag TagContainer, headerParts []string) *Tag {
+func buildTagHierarchy(parentTag tree.TagContainer, headerParts []string) *tree.Tag {
 	if len(headerParts) == 0 {
-		if tag, ok := parentTag.(*Tag); ok {
+		if tag, ok := parentTag.(*tree.Tag); ok {
 			return tag
 		}
 		return nil
 	}
 
 	// Find or create the tag for the first part
-	var currentTag *Tag
+	var currentTag *tree.Tag
 	for _, child := range parentTag.GetChildTags() {
 		if child.Title == headerParts[0] {
 			currentTag = child
@@ -160,16 +170,16 @@ func buildTagHierarchy(parentTag TagContainer, headerParts []string) *Tag {
 		// For the first header part, create as root-level tag (no parent hash)
 		// For subsequent parts, create with parent-based hash
 		var parentTitle string
-		if root, ok := parentTag.(*Root); ok {
+		if root, ok := parentTag.(*tree.Root); ok {
 			parentTitle = root.Title
-		} else if tag, ok := parentTag.(*Tag); ok {
+		} else if tag, ok := parentTag.(*tree.Tag); ok {
 			parentTitle = tag.Title
 		}
 
 		if parentTitle == "TestFile" || parentTitle == "Root" {
-			currentTag = NewTag(headerParts[0])
+			currentTag = tree.NewTag(headerParts[0])
 		} else {
-			currentTag = NewTagWithParent(headerParts[0], parentTitle)
+			currentTag = tree.NewTagWithParent(headerParts[0], parentTitle)
 		}
 		parentTag.AddChildTag(currentTag)
 	}

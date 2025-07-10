@@ -97,6 +97,11 @@ func handleParse(c *gin.Context) {
 	
 	// Set context type if provided
 	if req.ContextType != "" {
+		// Validate context type
+		if !isValidContextType(req.ContextType) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid context type: " + req.ContextType})
+			return
+		}
 		contextType := ontology.ContextType(req.ContextType)
 		metadata.ContextType = contextType
 	}
@@ -130,6 +135,11 @@ func handleBuild(c *gin.Context) {
 	
 	// Set context type if provided
 	if req.ContextType != "" {
+		// Validate context type
+		if !isValidContextType(req.ContextType) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid context type: " + req.ContextType})
+			return
+		}
 		contextType := ontology.ContextType(req.ContextType)
 		metadata.ContextType = contextType
 	}
@@ -159,4 +169,24 @@ func handleHash(c *gin.Context) {
 	}
 	hash := idgen.HashFrom(req.Value)
 	c.JSON(200, HashResponse{Hash: hash})
+}
+
+// isValidContextType validates that the provided context type is valid
+func isValidContextType(contextType string) bool {
+	validTypes := []string{
+		"Colleges",
+		"Certifications", 
+		"EntranceExams",
+		"APExams",
+		"UserGeneratedContent",
+		"DoD",
+		"None",
+	}
+	
+	for _, validType := range validTypes {
+		if contextType == validType {
+			return true
+		}
+	}
+	return false
 }

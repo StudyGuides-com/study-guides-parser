@@ -1,10 +1,52 @@
-package builder
+package tree
 
 import (
+	"fmt"
+
 	"github.com/studyguides-com/study-guides-parser/core/config"
 	"github.com/studyguides-com/study-guides-parser/core/idgen"
 	"github.com/studyguides-com/study-guides-parser/core/ontology"
 )
+
+// TagQATarget defines the interface for tags that can be QA'd
+type TagQATarget interface {
+	GetTagType() ontology.TagType
+	GetTitle() string
+}
+
+// TreeQAble defines the interface for types that can be QA'd
+// The visitor function is called for each tag with its depth
+// Traverse must visit all tags in the tree
+// GetWarnings/SetWarnings manage QA warnings
+// GetQAPassed/SetQAPassed manage QA pass/fail status
+type TreeQAble interface {
+	Traverse(visitor func(TagQATarget, int))
+	GetWarnings() []string
+	SetWarnings(warnings []string)
+	GetQAPassed() bool
+	SetQAPassed(passed bool)
+}
+// Root represents the file-level container, not an actual content tag
+type Root struct {
+	Title     string   `json:"title"`
+	QAPassed  bool     `json:"qa_passed,omitempty"`
+	Warnings  []string `json:"warnings,omitempty"`
+	ChildTags []*Tag   `json:"child_tags,omitempty"`
+}
+
+func NewRoot() *Root {
+	return &Root{
+		Title: "Root",
+	}
+}
+
+func (r *Root) GetChildTags() []*Tag {
+	return r.ChildTags
+}
+
+func (r *Root) AddChildTag(tag *Tag) {
+	r.ChildTags = append(r.ChildTags, tag)
+}
 
 type Tree struct {
 	Root     *Root            `json:"root"`
@@ -30,26 +72,6 @@ type TagTypeAssignable interface {
 	SetContext(contextType ontology.ContextType)
 	GetTagType() ontology.TagType
 	GetContext() ontology.ContextType
-}
-
-// Root represents the file-level container, not an actual content tag
-type Root struct {
-	Title     string `json:"title"`
-	ChildTags []*Tag `json:"child_tags,omitempty"`
-}
-
-func NewRoot() *Root {
-	return &Root{
-		Title: "Root",
-	}
-}
-
-func (r *Root) GetChildTags() []*Tag {
-	return r.ChildTags
-}
-
-func (r *Root) AddChildTag(tag *Tag) {
-	r.ChildTags = append(r.ChildTags, tag)
 }
 
 type Passage struct {
@@ -158,11 +180,11 @@ type TreeTraverser interface {
 
 // TagTypeAssigner defines the interface for assigning tag types
 type TagTypeAssigner interface {
-	AssignTagTypes(contextType ontology.ContextType)
+	AssignTagTypes(contextType ontology.ContextType) error
 }
 
-// Traverse implements TreeTraverser interface
-func (t *Tree) Traverse(visitor func(TagTypeAssignable, int)) {
+// TraverseForTagTypes implements TreeTraverser interface for tag type assignment
+func (t *Tree) TraverseForTagTypes(visitor func(TagTypeAssignable, int)) {
 	if t.Root == nil {
 		return
 	}
@@ -183,6 +205,26 @@ func (t *Tree) Traverse(visitor func(TagTypeAssignable, int)) {
 	}
 	
 	// Start traversal from root-level tags
+	for _, child := range t.Root.ChildTags {
+		traverse(child, 1)
+	}
+}
+
+// Traverse implements TreeQAble interface for QA
+func (t *Tree) Traverse(visitor func(TagQATarget, int)) {
+	if t.Root == nil {
+		return
+	}
+	var traverse func(*Tag, int)
+	traverse = func(tag *Tag, depth int) {
+		if tag == nil {
+			return
+		}
+		visitor(tag, depth)
+		for _, child := range tag.ChildTags {
+			traverse(child, depth+1)
+		}
+	}
 	for _, child := range t.Root.ChildTags {
 		traverse(child, 1)
 	}
@@ -222,20 +264,22 @@ func (t *Tree) TraverseWithContext(visitor func(TagTypeAssignable, int, ontology
 }
 
 // AssignTagTypes implements TagTypeAssigner interface
-func (t *Tree) AssignTagTypes(contextType ontology.ContextType) {
+func (t *Tree) AssignTagTypes(contextType ontology.ContextType) error {
 	// First, determine the maximum depth of the tree
 	maxDepth := t.getMaxDepth()
 	
 	// Find the ontology entry for this total depth
 	tagOntology := ontology.FindTagOntology(contextType, maxDepth)
 	if tagOntology == nil {
-		return // No ontology found for this depth
+		return fmt.Errorf("no ontology found for context type '%s' with depth %d", contextType, maxDepth)
 	}
 	
 	// Now traverse and assign types based on individual tag depths
-	t.Traverse(func(tag TagTypeAssignable, depth int) {
+	t.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		assignTagTypeFromOntology(tag, contextType, depth, tagOntology)
 	})
+	
+	return nil
 }
 
 // getMaxDepth calculates the maximum depth of the tree
@@ -267,5 +311,61 @@ func assignTagTypeFromOntology(tag TagTypeAssignable, contextType ontology.Conte
 	if depth <= len(tagOntology.TagTypes) {
 		tag.SetTagType(tagOntology.TagTypes[depth-1]) // depth is 1-indexed, slice is 0-indexed
 		tag.SetContext(contextType)
+	}
+}
+
+// GetTitle implements TagQATarget
+func (t *Tag) GetTitle() string {
+	return t.Title
+}
+
+// GetWarnings returns the current warnings
+func (r *Root) GetWarnings() []string {
+	return r.Warnings
+}
+
+// SetWarnings sets the warnings
+func (r *Root) SetWarnings(warnings []string) {
+	r.Warnings = warnings
+}
+
+// GetQAPassed returns whether QA passed
+func (r *Root) GetQAPassed() bool {
+	return r.QAPassed
+}
+
+// SetQAPassed sets whether QA passed
+func (r *Root) SetQAPassed(passed bool) {
+	r.QAPassed = passed
+}
+
+// GetWarnings returns the current warnings from the root
+func (t *Tree) GetWarnings() []string {
+	if t.Root == nil {
+		return nil
+	}
+	return t.Root.GetWarnings()
+}
+
+// SetWarnings sets the warnings on the root
+func (t *Tree) SetWarnings(warnings []string) {
+	if t.Root == nil {
+		return
+	}
+	t.Root.SetWarnings(warnings)
+}
+
+// GetQAPassed returns whether QA passed
+func (t *Tree) GetQAPassed() bool {
+	if t.Root != nil {
+		return t.Root.GetQAPassed()
+	}
+	return false
+}
+
+// SetQAPassed sets whether QA passed
+func (t *Tree) SetQAPassed(passed bool) {
+	if t.Root != nil {
+		t.Root.SetQAPassed(passed)
 	}
 }
