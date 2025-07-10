@@ -91,6 +91,7 @@ func NewPassage(title string, content string, questions []*Question) *Passage {
 }
 
 type Question struct {
+	InsertID   string   `json:"insert_id,omitempty"`
 	Hash       string   `json:"hash,omitempty"`
 	Prompt     string   `json:"prompt"`
 	Answer     string   `json:"answer"`
@@ -100,6 +101,7 @@ type Question struct {
 
 func NewQuestion(prompt string, answer string, distractor []string, learnMore string) *Question {
 	return &Question{
+		InsertID: idgen.NewCUID(),
 		Hash:       idgen.HashFrom(prompt + answer),
 		Prompt:     prompt,
 		Answer:     answer,
