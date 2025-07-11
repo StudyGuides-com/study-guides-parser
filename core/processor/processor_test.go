@@ -27,7 +27,7 @@ func TestParse(t *testing.T) {
 				"",
 				"Learn More: See Khan Academy's linear equations course.",
 			},
-			metadata: config.NewMetaData("test_parser"),
+			metadata: config.NewMetadata("test_parser"),
 			wantErr:  false,
 		},
 		{
@@ -39,7 +39,19 @@ func TestParse(t *testing.T) {
 				"1. What is a derivative? - The rate of change of a function.",
 				"2. How do you find the derivative of x²? - Use the power rule: 2x.",
 			},
-			metadata: config.NewMetaData("ap_test_parser"),
+			metadata: config.NewMetadata("ap_test_parser"),
+			wantErr:  false,
+		},
+		{
+			name: "valid study guide with learn more line containing leading whitespace",
+			lines: []string{
+				"Military Study Guide",
+				"DOD: Navy: Regulations: Leave Policy",
+				"",
+				"1. What happens if an absence extends over special liberty? - The entire period is charged as leave.",
+				"    Learn More: If an unavoidable absence extends over special liberty exceeding 24 hours and return occurs after 0900, the entire period is charged as leave from the day special liberty started through the day of return, as defined in MILPERSMAN 1050-110.",
+			},
+			metadata: config.NewMetadata("military_test_parser"),
 			wantErr:  false,
 		},
 		{
@@ -48,14 +60,14 @@ func TestParse(t *testing.T) {
 				"Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations",
 				"1. What is x? - A variable",
 			},
-			metadata:      config.NewMetaData("test_parser"),
+			metadata:      config.NewMetadata("test_parser"),
 			wantErr:       true,
 			wantErrSubstr: "file header",
 		},
 		{
 			name:          "empty lines",
 			lines:         []string{},
-			metadata:      config.NewMetaData("test_parser"),
+			metadata:      config.NewMetadata("test_parser"),
 			wantErr:       true,
 			wantErrSubstr: "no lines",
 		},
@@ -66,7 +78,6 @@ func TestParse(t *testing.T) {
 			result, err := Parse(tt.lines, tt.metadata)
 			if err != nil {
 				t.Errorf("Parse() unexpected error: %v", err)
-				return
 			}
 			if tt.wantErr {
 				if result.Success {
@@ -96,7 +107,6 @@ func TestParse(t *testing.T) {
 			if result.AST.Root == nil {
 				t.Errorf("Parse() returned AST with nil root")
 			}
-
 		})
 	}
 }
@@ -118,7 +128,7 @@ Learn More: See Khan Academy's linear equations course.`
 	if _, err := tmpFile.WriteString(testContent); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
-	result, err := ParseFile(tmpFile.Name(), config.NewMetaData("test_parser"))
+	result, err := ParseFile(tmpFile.Name(), config.NewMetadata("test_parser"))
 	if err != nil {
 		t.Errorf("ParseFile() unexpected error: %v", err)
 		return
@@ -151,7 +161,7 @@ func TestMetadata(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			metadata := config.NewMetaData(tt.parserType)
+			metadata := config.NewMetadata(tt.parserType)
 			if metadata.Type != tt.expected {
 				t.Errorf("Metadata Type = %s, want %s", metadata.Type, tt.expected)
 			}
@@ -160,7 +170,7 @@ func TestMetadata(t *testing.T) {
 }
 
 func TestMetadataWithOption(t *testing.T) {
-	metadata := config.NewMetaData("test_parser").WithOption("strict", "true").WithOption("debug", "false")
+	metadata := config.NewMetadata("test_parser").WithOption("strict", "true").WithOption("debug", "false")
 
 	if metadata.Type != "test_parser" {
 		t.Errorf("Expected parser type 'test_parser', got %s", metadata.Type)
@@ -248,7 +258,7 @@ func TestParseFileWithLexerError(t *testing.T) {
 	if _, err := tmpFile.WriteString(testContent); err != nil {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
-	result, err := ParseFile(tmpFile.Name(), config.NewMetaData("test_parser"))
+	result, err := ParseFile(tmpFile.Name(), config.NewMetadata("test_parser"))
 	if err != nil {
 		t.Errorf("ParseFile() unexpected error: %v", err)
 		return

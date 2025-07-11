@@ -117,12 +117,14 @@ func ParsePassage(lineInfo LineInfo) (*PassageResult, *PreParsingError) {
 
 // ParseLearnMore parses learn more lines
 func ParseLearnMore(lineInfo LineInfo) (*LearnMoreResult, *PreParsingError) {
-	lowerLine := strings.ToLower(lineInfo.Text)
-	if !strings.HasPrefix(lowerLine, constants.LearnMorePrefix) {
+	if !cleanstring.New(lineInfo.Text).HasPrefix(constants.LearnMorePrefix) {
 		return nil, NewPreParsingError(CodeValidation, "learn more line must start with 'Learn More:'", lineInfo)
 	}
-	colonIdx := len(constants.LearnMorePrefix)
-	rest := lineInfo.Text[colonIdx:]
+	// Find the colon after "Learn More" and get everything after it
+	cleanedText := cleanstring.New(lineInfo.Text).Clean()
+	lowerCleanedText := strings.ToLower(cleanedText)
+	colonIdx := strings.Index(lowerCleanedText, constants.LearnMorePrefix) + len(constants.LearnMorePrefix)
+	rest := cleanedText[colonIdx:]
 	text := cleanstring.New(rest).Clean()
 	if text == "" {
 		return nil, NewPreParsingError(CodeValidation, "learn more line must contain text after 'Learn More:'", lineInfo)

@@ -9,8 +9,8 @@ type Metadata struct {
 	ContextType ontology.ContextType      `json:"context_type,omitempty"`
 }
 
-// NewMetaData creates a new Metadata struct with the given type
-func NewMetaData(typeName string) *Metadata {
+// NewMetadata creates a new Metadata struct with the given type
+func NewMetadata(typeName string) *Metadata {
 	return &Metadata{
 		Type:    typeName,
 		Options: make(map[string]string),

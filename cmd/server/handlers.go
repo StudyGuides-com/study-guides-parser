@@ -93,7 +93,7 @@ func handleParse(c *gin.Context) {
 	}
 
 	lines := strings.Split(req.Content, "\n")
-	metadata := config.NewMetaData("parse")
+	metadata := config.NewMetadata("parse")
 	
 	// Set context type if provided
 	if req.ContextType != "" {
@@ -131,7 +131,7 @@ func handleBuild(c *gin.Context) {
 	}
 
 	lines := strings.Split(req.Content, "\n")
-	metadata := config.NewMetaData("build")
+	metadata := config.NewMetadata("build")
 	
 	// Set context type if provided
 	if req.ContextType != "" {

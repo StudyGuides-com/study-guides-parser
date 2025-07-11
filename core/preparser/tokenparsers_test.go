@@ -364,6 +364,18 @@ func TestLineLearnMoreParser(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "valid learn more with leading whitespace - reproduces user issue",
+			lineInfo: LineInfo{
+				Number: 7101,
+				Type:   TokenTypeLearnMore,
+				Text:   "    Learn More: If an unavoidable absence extends over special liberty exceeding 24 hours and return occurs after 0900, the entire period is charged as leave from the day special liberty started through the day of return, as defined in MILPERSMAN 1050-110.\r",
+			},
+			want: &LearnMoreResult{
+				Text: "If an unavoidable absence extends over special liberty exceeding 24 hours and return occurs after 0900, the entire period is charged as leave from the day special liberty started through the day of return, as defined in MILPERSMAN 1050-110.",
+			},
+			wantErr: false,
+		},
+		{
 			name: "invalid learn more no keyword",
 			lineInfo: LineInfo{
 				Number: 1,
