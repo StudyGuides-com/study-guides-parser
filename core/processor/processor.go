@@ -23,14 +23,14 @@ type ProcessingError struct {
 }
 
 type LexerOutput struct {
-	Filename string            `json:"filename"`
+	Metadata *config.Metadata  `json:"metadata"`
 	Tokens   []lexer.LineInfo  `json:"tokens"`
 	Errors   []ProcessingError `json:"errors"`
 	Success  bool              `json:"success"`
 }
 
 type PreparserOutput struct {
-	Filename string                     `json:"filename"`
+	Metadata *config.Metadata           `json:"metadata"`
 	Tokens   []preparser.ParsedLineInfo `json:"tokens"`
 	Errors   []ProcessingError          `json:"errors"`
 	Success  bool                       `json:"success"`
@@ -44,7 +44,7 @@ type ParserOutput struct {
 }
 
 type BuilderOutput struct {
-	Tree    *tree.Tree     `json:"tree,omitempty"`
+	Tree    *tree.Tree        `json:"tree,omitempty"`
 	Errors  []ProcessingError `json:"errors,omitempty"`
 	Success bool              `json:"success"`
 }
@@ -61,7 +61,7 @@ func ParseFile(filename string, metadata *config.Metadata) (*ParserOutput, error
 
 // Parse parses a slice of strings into an Abstract Syntax Tree
 func Parse(lines []string, metadata *config.Metadata) (*ParserOutput, error) {
-	preOut, err := Preparse(lines)
+	preOut, err := Preparse(lines, metadata)
 	if err != nil {
 		return nil, fmt.Errorf("preparser error: %w", err)
 	}
@@ -107,7 +107,7 @@ func ParseFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Pars
 	}, nil
 }
 
-func Lex(lines []string) (LexerOutput, error) {
+func Lex(lines []string, metadata *config.Metadata) (LexerOutput, error) {
 	lex := lexer.NewLexer()
 	var tokens []lexer.LineInfo
 	var errors []*lexer.LexerError
@@ -139,23 +139,25 @@ func Lex(lines []string) (LexerOutput, error) {
 	}, nil
 }
 
-func Preparse(lines []string) (PreparserOutput, error) {
+func Preparse(lines []string, metadata *config.Metadata) (PreparserOutput, error) {
 	// Step 1: Run lexer and collect all lexer errors
-	lexOut, err := Lex(lines)
+	lexOut, err := Lex(lines, metadata)
 	if err != nil {
 		// If there's a critical error with the lexer itself, return it
 		return PreparserOutput{
-			Errors:  []ProcessingError{{LineNumber: 0, Message: err.Error(), Code: "CRITICAL_ERROR"}},
-			Success: false,
+			Metadata: metadata,
+			Errors:   []ProcessingError{{LineNumber: 0, Message: err.Error(), Code: "CRITICAL_ERROR"}},
+			Success:  false,
 		}, err
 	}
 
 	// If lexer failed, return immediately with lexer errors
 	if !lexOut.Success {
 		return PreparserOutput{
-			Tokens:  nil,
-			Errors:  lexOut.Errors,
-			Success: false,
+			Metadata: metadata,
+			Tokens:   nil,
+			Errors:   lexOut.Errors,
+			Success:  false,
 		}, nil
 	}
 
@@ -198,7 +200,7 @@ func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
 }
 
 func Build(lines []string, metadata *config.Metadata) (*BuilderOutput, error) {
-	preOut, err := Preparse(lines)
+	preOut, err := Preparse(lines, metadata)
 	if err != nil {
 		return nil, fmt.Errorf("preparser error: %w", err)
 	}

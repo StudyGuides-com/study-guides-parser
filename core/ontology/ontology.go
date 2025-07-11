@@ -19,4 +19,4 @@ func AssignTagType(tag interface{}, contextType ContextType, depth int) {
 		// The builder package will implement the actual tag type assignment
 		// This is just a helper function to find the ontology
 	}
-} 
+}

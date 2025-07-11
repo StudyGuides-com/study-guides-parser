@@ -48,4 +48,4 @@ type TagOntology struct {
 	ContextType  ContextType
 	HeaderLength int
 	TagTypes     []TagType
-} 
+}

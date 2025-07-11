@@ -20,7 +20,7 @@ func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *tree.Tree
 
 	// Walk through the AST and build the tree
 	buildTree(ast.Root, tree.Root)
-	
+
 	// Assign tag types based on context
 	if metadata.ContextType != ontology.ContextTypeNone {
 		_ = tree.AssignTagTypes(metadata.ContextType)
@@ -46,7 +46,7 @@ func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata,
 
 	// Walk through the AST and build the tree
 	buildTree(ast.Root, tree.Root)
-	
+
 	// Assign tag types based on the provided context
 	tree.AssignTagTypes(contextType)
 

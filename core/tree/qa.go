@@ -18,8 +18,8 @@ func NewQAResult(name string, passed bool) QAResult {
 
 // QAResults represents all QA results for a tree
 type QAResults struct {
-	OverallPassed bool        `json:"overall_passed"` // Whether all QA steps passed
-	Results       []QAResult  `json:"results"`        // Individual QA step results
+	OverallPassed bool       `json:"overall_passed"` // Whether all QA steps passed
+	Results       []QAResult `json:"results"`        // Individual QA step results
 }
 
 // NewQAResults creates a new QAResults with default values
@@ -75,4 +75,4 @@ func (t *Tree) SetQAResults(results QAResults) {
 		return
 	}
 	t.Root.SetQAResults(results)
-} 
+}

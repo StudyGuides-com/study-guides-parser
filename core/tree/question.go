@@ -22,4 +22,4 @@ func NewQuestion(prompt string, answer string, distractor []string, learnMore st
 		Distractor: distractor,
 		LearnMore:  learnMore,
 	}
-} 
+}

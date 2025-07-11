@@ -10,18 +10,18 @@ import (
 func (t *Tree) AssignTagTypes(contextType ontology.ContextType) error {
 	// First, determine the maximum depth of the tree
 	maxDepth := t.getMaxDepth()
-	
+
 	// Find the ontology entry for this total depth
 	tagOntology := ontology.FindTagOntology(contextType, maxDepth)
 	if tagOntology == nil {
 		return fmt.Errorf("no ontology found for context type '%s' with depth %d", contextType, maxDepth)
 	}
-	
+
 	// Now traverse and assign types based on individual tag depths
 	t.TraverseForTagTypes(func(tag TagTypeAssignable, depth int) {
 		assignTagTypeFromOntology(tag, contextType, depth, tagOntology)
 	})
-	
+
 	return nil
 }
 
@@ -30,7 +30,7 @@ func (t *Tree) getMaxDepth() int {
 	if t.Root == nil {
 		return 0
 	}
-	
+
 	var maxDepth int
 	var traverse func(*Tag, int)
 	traverse = func(tag *Tag, depth int) {
@@ -41,11 +41,11 @@ func (t *Tree) getMaxDepth() int {
 			traverse(child, depth+1)
 		}
 	}
-	
+
 	for _, child := range t.Root.ChildTags {
 		traverse(child, 1)
 	}
-	
+
 	return maxDepth
 }
 
@@ -55,4 +55,4 @@ func assignTagTypeFromOntology(tag TagTypeAssignable, contextType ontology.Conte
 		tag.SetTagType(tagOntology.TagTypes[depth-1]) // depth is 1-indexed, slice is 0-indexed
 		tag.SetContext(contextType)
 	}
-} 
+}

@@ -161,4 +161,4 @@ var tagOntology = []TagOntology{
 		TagTypeModule,
 		TagTypeTopic,
 	}},
-} 
+}

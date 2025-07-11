@@ -2,10 +2,10 @@ package tree
 
 // Root represents the file-level container, not an actual content tag
 type Root struct {
-	Title     string     `json:"title"`
-	QAResults QAResults  `json:"qa_results,omitempty"`
-	Warnings  []string   `json:"warnings,omitempty"`
-	ChildTags []*Tag     `json:"child_tags,omitempty"`
+	Title     string    `json:"title"`
+	QAResults QAResults `json:"qa_results,omitempty"`
+	Warnings  []string  `json:"warnings,omitempty"`
+	ChildTags []*Tag    `json:"child_tags,omitempty"`
 }
 
 func NewRoot() *Root {
@@ -53,4 +53,4 @@ func (r *Root) GetQAResults() QAResults {
 // SetQAResults sets the QA results
 func (r *Root) SetQAResults(results QAResults) {
 	r.QAResults = results
-} 
+}

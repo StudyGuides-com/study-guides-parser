@@ -42,29 +42,30 @@ We've successfully implemented the simple API! Users can now parse study guides 
 
 ```go
 // Super simple - just one function call
-ast, err := processor.ParseFile("study_guide.txt", processor.Colleges)
+ast, err := processor.ParseFile("study_guide.txt", config.NewMetadata("colleges"))
 if err != nil {
     log.Fatal(err)
 }
 
 // Or from strings
 lines := []string{"Mathematics Study Guide", "Colleges: Virginia: ODU: MATH 101: Linear Equations", "1. What is x? - A variable"}
-ast, err := processor.ParseLines(lines, processor.Colleges)
+ast, err := processor.Parse(lines, config.NewMetadata("colleges"))
 ```
 
 **Available Functions:**
 
-- `processor.ParseFile(filename, parserType)` - Parse directly from a file
-- `processor.ParseLines(lines, parserType)` - Parse from string slices
-- `processor.ParseTokens(tokens, parserType)` - Parse from pre-processed tokens
+- `processor.ParseFile(filename, metadata)` - Parse directly from a file
+- `processor.Parse(lines, metadata)` - Parse from string slices
+- `processor.Preparse(lines, metadata)` - Preprocess and tokenize
+- `processor.Lex(lines, metadata)` - Lexical analysis only
 
 **Supported Parser Types:**
 
-- `processor.Colleges` - College study guides
-- `processor.APExams` - AP exam study guides
-- `processor.Certifications` - Certification study guides
-- `processor.DOD` - Department of Defense study guides
-- `processor.EntranceExams` - Entrance exam study guides
+- `config.NewMetadata("colleges")` - College study guides
+- `config.NewMetadata("ap_exams")` - AP exam study guides
+- `config.NewMetadata("certifications")` - Certification study guides
+- `config.NewMetadata("dod")` - Department of Defense study guides
+- `config.NewMetadata("entrance_exams")` - Entrance exam study guides
 
 ### 🔄 Remaining Phases
 

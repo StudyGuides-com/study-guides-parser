@@ -21,14 +21,14 @@ func NewTagTypeQA() *TagTypeQA {
 
 func (qa *TagTypeQA) RunQA(t tree.TreeQAble) tree.QAResult {
 	var warnings []string
-	
+
 	t.Traverse(func(tagQAble tree.TagQATarget, depth int) {
 		if tagQAble.GetTagType() == ontology.TagTypeNone {
-			warnings = append(warnings, 
+			warnings = append(warnings,
 				fmt.Sprintf("Tag '%s' at depth %d has TagTypeNone", tagQAble.GetTitle(), depth))
 		}
 	})
-	
+
 	result := tree.NewQAResult("Must have TagType", len(warnings) == 0)
 	if len(warnings) > 0 {
 		result.Warnings = warnings
@@ -46,14 +46,14 @@ func NewContextTypeQA() *ContextTypeQA {
 
 func (qa *ContextTypeQA) RunQA(t tree.TreeQAble) tree.QAResult {
 	var warnings []string
-	
+
 	t.Traverse(func(tagQAble tree.TagQATarget, depth int) {
 		if tagQAble.GetContext() == ontology.ContextTypeNone {
-			warnings = append(warnings, 
+			warnings = append(warnings,
 				fmt.Sprintf("Tag '%s' at depth %d has ContextTypeNone", tagQAble.GetTitle(), depth))
 		}
 	})
-	
+
 	result := tree.NewQAResult("Must have ContextType", len(warnings) == 0)
 	if len(warnings) > 0 {
 		result.Warnings = warnings
@@ -85,7 +85,7 @@ func NewTreeQARunner(qaSteps ...TreeQA) *TreeQARunner {
 func (runner *TreeQARunner) RunQAAndUpdate(t tree.TreeQAble) {
 	var results []tree.QAResult
 	overallPassed := true
-	
+
 	for _, qaStep := range runner.qaSteps {
 		result := qaStep.RunQA(t)
 		results = append(results, result)
@@ -93,10 +93,10 @@ func (runner *TreeQARunner) RunQAAndUpdate(t tree.TreeQAble) {
 			overallPassed = false
 		}
 	}
-	
+
 	qaResults := tree.NewQAResults()
 	qaResults.OverallPassed = overallPassed
 	qaResults.Results = results
-	
+
 	t.SetQAResults(qaResults)
-} 
+}

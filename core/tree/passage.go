@@ -18,4 +18,4 @@ func NewPassage(title string, content string, questions []*Question) *Passage {
 		Content:   content,
 		Questions: questions,
 	}
-} 
+}

@@ -103,4 +103,4 @@ func TestAssignTagTypesError(t *testing.T) {
 	if err.Error() != expectedError {
 		t.Errorf("Expected error message '%s', got '%s'", expectedError, err.Error())
 	}
-} 
+}

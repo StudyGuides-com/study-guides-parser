@@ -43,7 +43,8 @@ func handleLex(c *gin.Context) {
 	}
 
 	lines := strings.Split(req.Content, "\n")
-	result, err := processor.Lex(lines)
+	metadata := config.NewMetadata("lex")
+	result, err := processor.Lex(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lexing error: " + err.Error()})
 		return
@@ -68,7 +69,8 @@ func handlePreparse(c *gin.Context) {
 	}
 
 	lines := strings.Split(req.Content, "\n")
-	result, err := processor.Preparse(lines)
+	metadata := config.NewMetadata("preparse")
+	result, err := processor.Preparse(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Preparsing error: " + err.Error()})
 		return
@@ -94,7 +96,7 @@ func handleParse(c *gin.Context) {
 
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetadata("parse")
-	
+
 	// Set context type if provided
 	if req.ContextType != "" {
 		// Validate context type
@@ -132,7 +134,7 @@ func handleBuild(c *gin.Context) {
 
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetadata("build")
-	
+
 	// Set context type if provided
 	if req.ContextType != "" {
 		// Validate context type
@@ -175,14 +177,14 @@ func handleHash(c *gin.Context) {
 func isValidContextType(contextType string) bool {
 	validTypes := []string{
 		"Colleges",
-		"Certifications", 
+		"Certifications",
 		"EntranceExams",
 		"APExams",
 		"UserGeneratedContent",
 		"DoD",
 		"None",
 	}
-	
+
 	for _, validType := range validTypes {
 		if contextType == validType {
 			return true

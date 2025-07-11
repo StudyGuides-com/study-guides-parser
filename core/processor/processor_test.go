@@ -191,7 +191,7 @@ func TestPreparseReturnsOnlyLexerErrors(t *testing.T) {
 		"Another line",                    // Should not be reached by preparser
 	}
 
-	result, err := Preparse(lines)
+	result, err := Preparse(lines, config.NewMetadata("test_parser"))
 	if err != nil {
 		t.Fatalf("Preparse() returned unexpected error: %v", err)
 	}
@@ -225,7 +225,7 @@ func TestPreparseReturnsOnlyPreparserErrors(t *testing.T) {
 		"Some content here",                // Valid content
 	}
 
-	result, err := Preparse(lines)
+	result, err := Preparse(lines, config.NewMetadata("test_parser"))
 	if err != nil {
 		t.Fatalf("Preparse() returned unexpected error: %v", err)
 	}

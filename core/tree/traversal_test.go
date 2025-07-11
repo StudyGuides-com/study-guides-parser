@@ -81,4 +81,4 @@ func TestTraverseWithContext(t *testing.T) {
 			t.Errorf("Expected context %s at position %d, got %s", ontology.ContextTypeAPExams, i, context)
 		}
 	}
-} 
+}

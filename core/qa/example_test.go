@@ -47,11 +47,11 @@ func ExampleQAResults() {
 	// Output:
 	// Overall QA Passed: false
 	// Number of QA steps: 2
-	// QA Step 1: Tag Type Validation
+	// QA Step 1: Must have TagType
 	//   Passed: false
 	//   Warnings: 1
 	//     1. Tag 'Invalid Tag' at depth 1 has TagTypeNone
-	// QA Step 2: Context Type Validation
+	// QA Step 2: Must have ContextType
 	//   Passed: false
 	//   Warnings: 1
 	//     1. Tag 'Invalid Tag' at depth 1 has ContextTypeNone
@@ -97,8 +97,8 @@ func TestQAResultsStructure(t *testing.T) {
 
 	// Check the Tag Type Validation result
 	tagTypeResult := qaResults.Results[0]
-	if tagTypeResult.Name != "Tag Type Validation" {
-		t.Errorf("Expected QA step name 'Tag Type Validation', got '%s'", tagTypeResult.Name)
+	if tagTypeResult.Name != "Must have TagType" {
+		t.Errorf("Expected QA step name 'Must have TagType', got '%s'", tagTypeResult.Name)
 	}
 
 	if !tagTypeResult.Passed {
@@ -111,8 +111,8 @@ func TestQAResultsStructure(t *testing.T) {
 
 	// Check the Context Type Validation result
 	contextTypeResult := qaResults.Results[1]
-	if contextTypeResult.Name != "Context Type Validation" {
-		t.Errorf("Expected QA step name 'Context Type Validation', got '%s'", contextTypeResult.Name)
+	if contextTypeResult.Name != "Must have ContextType" {
+		t.Errorf("Expected QA step name 'Must have ContextType', got '%s'", contextTypeResult.Name)
 	}
 
 	if !contextTypeResult.Passed {
@@ -122,4 +122,4 @@ func TestQAResultsStructure(t *testing.T) {
 	if len(contextTypeResult.Warnings) != 0 {
 		t.Errorf("Expected no warnings for valid tags, got %d", len(contextTypeResult.Warnings))
 	}
-} 
+}

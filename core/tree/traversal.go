@@ -19,7 +19,7 @@ type TreeTraverser interface {
 	// Traverse performs a depth-first traversal of the tree
 	// The visitor function is called for each tag with its depth
 	Traverse(visitor func(TagTypeAssignable, int))
-	
+
 	// TraverseWithContext performs traversal with additional context
 	TraverseWithContext(visitor func(TagTypeAssignable, int, ontology.ContextType))
 }
@@ -34,22 +34,22 @@ func (t *Tree) TraverseForTagTypes(visitor func(TagTypeAssignable, int)) {
 	if t.Root == nil {
 		return
 	}
-	
+
 	var traverse func(*Tag, int)
 	traverse = func(tag *Tag, depth int) {
 		if tag == nil {
 			return
 		}
-		
+
 		// Visit current tag
 		visitor(tag, depth)
-		
+
 		// Recursively visit children
 		for _, child := range tag.ChildTags {
 			traverse(child, depth+1)
 		}
 	}
-	
+
 	// Start traversal from root-level tags
 	for _, child := range t.Root.ChildTags {
 		traverse(child, 1)
@@ -81,30 +81,30 @@ func (t *Tree) TraverseWithContext(visitor func(TagTypeAssignable, int, ontology
 	if t.Root == nil {
 		return
 	}
-	
+
 	// Get context from metadata
 	contextType := ontology.ContextTypeNone
 	if t.Metadata != nil {
 		contextType = t.Metadata.ContextType
 	}
-	
+
 	var traverse func(*Tag, int)
 	traverse = func(tag *Tag, depth int) {
 		if tag == nil {
 			return
 		}
-		
+
 		// Visit current tag with context
 		visitor(tag, depth, contextType)
-		
+
 		// Recursively visit children
 		for _, child := range tag.ChildTags {
 			traverse(child, depth+1)
 		}
 	}
-	
+
 	// Start traversal from root-level tags
 	for _, child := range t.Root.ChildTags {
 		traverse(child, 1)
 	}
-} 
+}
