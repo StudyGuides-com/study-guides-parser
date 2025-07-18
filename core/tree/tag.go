@@ -37,7 +37,7 @@ type Tag struct {
 	Hash               string                     `json:"hash,omitempty"`
 	Questions          []*Question                `json:"questions,omitempty"`
 	Passages           []*Passage                 `json:"passages,omitempty"`
-	ChildTags          []*Tag                     `json:"child_tags,omitempty"`
+	ChildTags          []*Tag                     `json:"child_tags"`
 }
 
 func NewTag(title string) *Tag {
@@ -50,6 +50,7 @@ func NewTag(title string) *Tag {
 		ContentRating: ontology.ContentRatingRatingPending,
 		ContentDescriptors: []string{},
 		MetaTags: []string{},
+		ChildTags: []*Tag{},
 	}
 }
 
@@ -61,6 +62,10 @@ func NewTagWithParent(title string, parentTitle string) *Tag {
 		Hash:     idgen.HashFrom(parentTitle + title),
 		TagType:  ontology.TagTypeNone,
 		Context:  ontology.ContextTypeNone,
+		ContentRating: ontology.ContentRatingRatingPending,
+		ContentDescriptors: []string{},
+		MetaTags: []string{},
+		ChildTags: []*Tag{},
 	}
 }
 

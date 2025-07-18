@@ -4,13 +4,15 @@ package tree
 type Root struct {
 	Title     string    `json:"title"`
 	QAResults QAResults `json:"qa_results,omitempty"`
-	Warnings  []string  `json:"warnings,omitempty"`
-	ChildTags []*Tag    `json:"child_tags,omitempty"`
+	Warnings  []string  `json:"warnings"`
+	ChildTags []*Tag    `json:"child_tags"`
 }
 
 func NewRoot() *Root {
 	return &Root{
-		Title: "Root",
+		Title:     "Root",
+		Warnings:  []string{},
+		ChildTags: []*Tag{},
 	}
 }
 
