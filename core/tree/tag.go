@@ -27,14 +27,17 @@ type TagTypeAssignable interface {
 }
 
 type Tag struct {
-	Title     string               `json:"title"`
-	TagType   ontology.TagType     `json:"tag_type,omitempty"`
-	InsertID  string               `json:"insert_id,omitempty"`
-	Context   ontology.ContextType `json:"context,omitempty"`
-	Hash      string               `json:"hash,omitempty"`
-	Questions []*Question          `json:"questions,omitempty"`
-	Passages  []*Passage           `json:"passages,omitempty"`
-	ChildTags []*Tag               `json:"child_tags,omitempty"`
+	Title              string                     `json:"title"`
+	TagType            ontology.TagType           `json:"tag_type,omitempty"`
+	InsertID           string                     `json:"insert_id,omitempty"`
+	Context            ontology.ContextType       `json:"context,omitempty"`
+	ContentRating      ontology.ContentRatingType `json:"content_rating"`
+	ContentDescriptors []string                   `json:"content_descriptors"`
+	MetaTags           []string                   `json:"meta_tags"`
+	Hash               string                     `json:"hash,omitempty"`
+	Questions          []*Question                `json:"questions,omitempty"`
+	Passages           []*Passage                 `json:"passages,omitempty"`
+	ChildTags          []*Tag                     `json:"child_tags,omitempty"`
 }
 
 func NewTag(title string) *Tag {
@@ -44,6 +47,9 @@ func NewTag(title string) *Tag {
 		Hash:     idgen.HashFrom(title),
 		TagType:  ontology.TagTypeNone,
 		Context:  ontology.ContextTypeNone,
+		ContentRating: ontology.ContentRatingRatingPending,
+		ContentDescriptors: []string{},
+		MetaTags: []string{},
 	}
 }
 

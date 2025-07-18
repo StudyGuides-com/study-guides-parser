@@ -49,3 +49,14 @@ type TagOntology struct {
 	HeaderLength int
 	TagTypes     []TagType
 }
+
+type ContentRatingType string
+
+const (
+	ContentRatingEveryone      ContentRatingType = "Everyone"
+	ContentRatingEveryone10    ContentRatingType = "Everyone10"
+	ContentRatingTeen          ContentRatingType = "Teen"
+	ContentRatingMature        ContentRatingType = "Mature"
+	ContentRatingAdultsOnly    ContentRatingType = "AdultsOnly"
+	ContentRatingRatingPending ContentRatingType = "RatingPending"
+)

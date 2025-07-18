@@ -9,8 +9,8 @@ type Question struct {
 	Hash       string   `json:"hash,omitempty"`
 	Prompt     string   `json:"prompt"`
 	Answer     string   `json:"answer"`
-	Distractor []string `json:"distractor,omitempty"`
-	LearnMore  string   `json:"learn_more,omitempty"`
+	Distractor []string `json:"distractor"`
+	LearnMore  string   `json:"learn_more"`
 }
 
 func NewQuestion(prompt string, answer string, distractor []string, learnMore string) *Question {

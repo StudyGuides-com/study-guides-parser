@@ -18,7 +18,7 @@ func NewTree(metadata *config.Metadata) *Tree {
 
 func (t *Tree) LeafNodes() []*Tag {
 	leafNodes := []*Tag{}
-	
+
 	// Use the existing Traverse method to walk the tree
 	t.Traverse(func(tag TagQATarget, depth int) {
 		// Type assert to *Tag to access ChildTags
@@ -29,6 +29,6 @@ func (t *Tree) LeafNodes() []*Tag {
 			}
 		}
 	})
-	
+
 	return leafNodes
 }
