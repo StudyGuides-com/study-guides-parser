@@ -9,17 +9,22 @@ type Question struct {
 	Hash       string   `json:"hash,omitempty"`
 	Prompt     string   `json:"prompt"`
 	Answer     string   `json:"answer"`
-	Distractor []string `json:"distractor"`
+	Distractors []string `json:"distractor"`
 	LearnMore  string   `json:"learn_more"`
 }
 
-func NewQuestion(prompt string, answer string, distractor []string, learnMore string) *Question {
+func NewQuestion(prompt string, answer string, distractors []string, learnMore string) *Question {
+	// If distractors is nil, create an empty slice
+	if distractors == nil {
+		distractors = []string{}
+	}
+	
 	return &Question{
 		InsertID:   idgen.NewCUID(),
 		Hash:       idgen.HashFrom(prompt + answer),
 		Prompt:     prompt,
 		Answer:     answer,
-		Distractor: distractor,
+		Distractors: distractors,
 		LearnMore:  learnMore,
 	}
 }
