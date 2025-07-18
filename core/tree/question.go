@@ -9,7 +9,7 @@ type Question struct {
 	Hash       string   `json:"hash,omitempty"`
 	Prompt     string   `json:"prompt"`
 	Answer     string   `json:"answer"`
-	Distractors []string `json:"distractor"`
+	Distractors []string `json:"distractors"`
 	LearnMore  string   `json:"learn_more"`
 }
 
