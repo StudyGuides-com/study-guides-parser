@@ -5,6 +5,7 @@ import (
 )
 
 type Passage struct {
+	InsertID  string      `json:"insert_id,omitempty"`
 	Hash      string      `json:"hash,omitempty"`
 	Title     string      `json:"title"`
 	Content   string      `json:"content,omitempty"`
@@ -13,6 +14,7 @@ type Passage struct {
 
 func NewPassage(title string, content string, questions []*Question) *Passage {
 	return &Passage{
+		InsertID:  idgen.NewCUID(),
 		Hash:      idgen.HashFrom(title),
 		Title:     title,
 		Content:   content,
