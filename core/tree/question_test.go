@@ -17,12 +17,12 @@ func TestNewQuestionWithNilDistractors(t *testing.T) {
 	jsonStr := string(jsonData)
 
 	// Verify distractors is an empty array instead of null
-	if !contains(jsonStr, `"distractor":[]`) {
+	if !contains(jsonStr, `"distractors":[]`) {
 		t.Errorf("Expected distractors to be empty array, got: %s", jsonStr)
 	}
 
 	// Verify we don't have null
-	if contains(jsonStr, `"distractor":null`) {
+	if contains(jsonStr, `"distractors":null`) {
 		t.Errorf("Found null for distractors, expected empty array")
 	}
 }
@@ -39,7 +39,7 @@ func TestNewQuestionWithEmptyDistractors(t *testing.T) {
 	jsonStr := string(jsonData)
 
 	// Verify distractors is an empty array
-	if !contains(jsonStr, `"distractor":[]`) {
+	if !contains(jsonStr, `"distractors":[]`) {
 		t.Errorf("Expected distractors to be empty array, got: %s", jsonStr)
 	}
 }
@@ -57,7 +57,7 @@ func TestNewQuestionWithDistractors(t *testing.T) {
 	jsonStr := string(jsonData)
 
 	// Verify distractors contains the expected values
-	if !contains(jsonStr, `"distractor":["3","4","5"]`) {
+	if !contains(jsonStr, `"distractors":["3","4","5"]`) {
 		t.Errorf("Expected distractors to contain values, got: %s", jsonStr)
 	}
 }
