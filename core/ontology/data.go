@@ -161,4 +161,12 @@ var tagOntology = []TagOntology{
 		TagTypeModule,
 		TagTypeTopic,
 	}},
+
+	// Encyclopedia
+	{ContextTypeEncyclopedia, 4, []TagType{
+		TagTypeCategory,
+		TagTypeVolume,
+		TagTypeRange,
+		TagTypeTopic,
+	}},
 }

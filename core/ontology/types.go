@@ -10,6 +10,7 @@ const (
 	ContextTypeAPExams              ContextType = "APExams"
 	ContextTypeUserGeneratedContent ContextType = "UserGeneratedContent"
 	ContextTypeDoD                  ContextType = "DoD"
+	ContextTypeEncyclopedia         ContextType = "Encyclopedia"
 	ContextTypeNone                 ContextType = "None"
 )
 
@@ -40,6 +41,8 @@ const (
 	TagTypeChapter          TagType = "Chapter"
 	TagTypeSection          TagType = "Section"
 	TagTypePart             TagType = "Part"
+	TagTypeVolume           TagType = "Volume"
+	TagTypeRange            TagType = "Range"
 	TagTypeNone             TagType = "None"
 )
 

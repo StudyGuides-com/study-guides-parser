@@ -42,30 +42,30 @@ type Tag struct {
 
 func NewTag(title string) *Tag {
 	return &Tag{
-		InsertID: idgen.NewCUID(),
-		Title:    title,
-		Hash:     idgen.HashFrom(title),
-		TagType:  ontology.TagTypeNone,
-		Context:  ontology.ContextTypeNone,
-		ContentRating: ontology.ContentRatingRatingPending,
+		InsertID:           idgen.NewCUID(),
+		Title:              title,
+		Hash:               idgen.HashFrom(title),
+		TagType:            ontology.TagTypeNone,
+		Context:            ontology.ContextTypeNone,
+		ContentRating:      ontology.ContentRatingRatingPending,
 		ContentDescriptors: []string{},
-		MetaTags: []string{},
-		ChildTags: []*Tag{},
+		MetaTags:           []string{},
+		ChildTags:          []*Tag{},
 	}
 }
 
 // NewTagWithParent creates a new tag with a hash based on its parent's title
 func NewTagWithParent(title string, parentTitle string) *Tag {
 	return &Tag{
-		InsertID: idgen.NewCUID(),
-		Title:    title,
-		Hash:     idgen.HashFrom(parentTitle + title),
-		TagType:  ontology.TagTypeNone,
-		Context:  ontology.ContextTypeNone,
-		ContentRating: ontology.ContentRatingRatingPending,
+		InsertID:           idgen.NewCUID(),
+		Title:              title,
+		Hash:               idgen.HashFrom(parentTitle + title),
+		TagType:            ontology.TagTypeNone,
+		Context:            ontology.ContextTypeNone,
+		ContentRating:      ontology.ContentRatingRatingPending,
 		ContentDescriptors: []string{},
-		MetaTags: []string{},
-		ChildTags: []*Tag{},
+		MetaTags:           []string{},
+		ChildTags:          []*Tag{},
 	}
 }
 

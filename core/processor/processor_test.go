@@ -185,6 +185,88 @@ func TestMetadataWithOption(t *testing.T) {
 	}
 }
 
+func TestBuildPassageHasInsertID(t *testing.T) {
+	lines := []string{
+		"TestFile",
+		"",
+		"TagA: TagB: TagC: TagD",
+		"",
+		"1. What is 1 + 1? - 2",
+		"Learn More: This is simple addition",
+		"",
+		"Passage: Tim had 5 apples and gave Mike 3",
+		"",
+		"It's a sunny day so the boys decide to have a snack",
+		"",
+		"1. How many apples are there? - 5",
+		"2. How many apples does Tim have? - 2",
+		"3. How many apples does Mike have? - 3",
+	}
+
+	metadata := config.NewMetadata("test_parser")
+	result, err := Build(lines, metadata)
+	if err != nil {
+		t.Fatalf("Build() unexpected error: %v", err)
+	}
+
+	if !result.Success {
+		t.Fatalf("Build() failed with errors: %v", result.Errors)
+	}
+
+	if result.Tree == nil {
+		t.Fatal("Build() returned nil tree")
+	}
+
+	// Navigate to the passage - go through TagA -> TagB -> TagC -> TagD
+	if len(result.Tree.Root.ChildTags) == 0 {
+		t.Fatal("Expected at least one tag in the tree")
+	}
+
+	tagA := result.Tree.Root.ChildTags[0]
+	if len(tagA.ChildTags) == 0 {
+		t.Fatal("Expected TagA to have child tags")
+	}
+
+	tagB := tagA.ChildTags[0]
+	if len(tagB.ChildTags) == 0 {
+		t.Fatal("Expected TagB to have child tags")
+	}
+
+	tagC := tagB.ChildTags[0]
+	if len(tagC.ChildTags) == 0 {
+		t.Fatal("Expected TagC to have child tags")
+	}
+
+	tagD := tagC.ChildTags[0]
+	if len(tagD.Passages) == 0 {
+		t.Fatal("Expected TagD to have passages")
+	}
+
+	passage := tagD.Passages[0]
+	if passage.InsertID == "" {
+		t.Error("Passage InsertID should not be empty")
+	}
+
+	// Verify InsertID is a valid CUID (starts with 'c' and has proper length)
+	if len(passage.InsertID) < 20 || passage.InsertID[0] != 'c' {
+		t.Errorf("Passage InsertID '%s' doesn't appear to be a valid CUID", passage.InsertID)
+	}
+
+	// Verify questions also have InsertIDs
+	if len(passage.Questions) == 0 {
+		t.Fatal("Expected passage to have questions")
+	}
+
+	for i, question := range passage.Questions {
+		if question.InsertID == "" {
+			t.Errorf("Question %d InsertID should not be empty", i)
+		}
+		if len(question.InsertID) < 20 || question.InsertID[0] != 'c' {
+			t.Errorf("Question %d InsertID '%s' doesn't appear to be a valid CUID", i, question.InsertID)
+		}
+	}
+}
+
 func TestPreparseReturnsOnlyLexerErrors(t *testing.T) {
 	lines := []string{
 		"\x00\x01\x02Invalid binary data", // Should trigger a lexer error
