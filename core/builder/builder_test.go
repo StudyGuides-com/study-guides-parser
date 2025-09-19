@@ -955,6 +955,139 @@ func TestBuildTreeWithContent_JSONOutput(t *testing.T) {
 	fmt.Println(string(jsonData))
 }
 
+func TestCategoryTagHashConsistency(t *testing.T) {
+	// Test that category tags (top-level tags) get consistent hashes
+	// regardless of the file name/root title
+
+	// First file with "Encyclopedia" as category
+	ast1 := &parser.AbstractSyntaxTree{
+		Metadata: &config.Metadata{Type: "build"},
+		Root: &parser.Node{
+			Type: lexer.TokenTypeFileHeader,
+			Data: preparser.ParsedValue{
+				FileHeader: &preparser.FileHeaderResult{
+					Title: "Alpargata-Aluminum",
+				},
+			},
+			Children: []*parser.Node{
+				{
+					Type: lexer.TokenTypeHeader,
+					Data: preparser.ParsedValue{
+						Header: &preparser.HeaderResult{
+							Parts: []string{"Encyclopedia", "A", "Topic1"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Second file with same "Encyclopedia" category but different file name
+	ast2 := &parser.AbstractSyntaxTree{
+		Metadata: &config.Metadata{Type: "build"},
+		Root: &parser.Node{
+			Type: lexer.TokenTypeFileHeader,
+			Data: preparser.ParsedValue{
+				FileHeader: &preparser.FileHeaderResult{
+					Title: "Something-Else",
+				},
+			},
+			Children: []*parser.Node{
+				{
+					Type: lexer.TokenTypeHeader,
+					Data: preparser.ParsedValue{
+						Header: &preparser.HeaderResult{
+							Parts: []string{"Encyclopedia", "B", "Topic2"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Build both trees
+	metadata1 := config.NewMetadata("build")
+	tree1 := Build(ast1, metadata1)
+
+	metadata2 := config.NewMetadata("build")
+	tree2 := Build(ast2, metadata2)
+
+	// Get Encyclopedia tags from both trees
+	encycTag1 := tree1.Root.ChildTags[0]
+	encycTag2 := tree2.Root.ChildTags[0]
+
+	// Verify both have the same title
+	if encycTag1.Title != "Encyclopedia" || encycTag2.Title != "Encyclopedia" {
+		t.Errorf("Expected both tags to be Encyclopedia")
+	}
+
+	// The critical test: both Encyclopedia tags should have the SAME hash
+	if encycTag1.Hash != encycTag2.Hash {
+		t.Errorf("Encyclopedia tags should have the same hash regardless of file name\n"+
+			"File1 (root: %s): hash = %s\n"+
+			"File2 (root: %s): hash = %s",
+			tree1.Root.Title, encycTag1.Hash,
+			tree2.Root.Title, encycTag2.Hash)
+	}
+
+	// Also verify the hash is what we expect for just "Encyclopedia"
+	expectedHash := idgen.HashFrom("Encyclopedia")
+	if encycTag1.Hash != expectedHash {
+		t.Errorf("Encyclopedia hash should be %s, got %s", expectedHash, encycTag1.Hash)
+	}
+}
+
+func TestNestedTagHashWithParent(t *testing.T) {
+	// Test that nested tags still get parent-based hashes
+	ast := &parser.AbstractSyntaxTree{
+		Metadata: &config.Metadata{Type: "build"},
+		Root: &parser.Node{
+			Type: lexer.TokenTypeFileHeader,
+			Data: preparser.ParsedValue{
+				FileHeader: &preparser.FileHeaderResult{
+					Title: "TestFile",
+				},
+			},
+			Children: []*parser.Node{
+				{
+					Type: lexer.TokenTypeHeader,
+					Data: preparser.ParsedValue{
+						Header: &preparser.HeaderResult{
+							Parts: []string{"Encyclopedia", "A", "Topic"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	metadata := config.NewMetadata("build")
+	tree := Build(ast, metadata)
+
+	// Check the hash hierarchy
+	encycTag := tree.Root.ChildTags[0]
+	aTag := encycTag.ChildTags[0]
+	topicTag := aTag.ChildTags[0]
+
+	// Encyclopedia should have hash from just its title
+	expectedEncycHash := idgen.HashFrom("Encyclopedia")
+	if encycTag.Hash != expectedEncycHash {
+		t.Errorf("Encyclopedia hash should be %s, got %s", expectedEncycHash, encycTag.Hash)
+	}
+
+	// A should have hash from Encyclopedia + A
+	expectedAHash := idgen.HashFrom("EncyclopediaA")
+	if aTag.Hash != expectedAHash {
+		t.Errorf("A tag hash should be %s, got %s", expectedAHash, aTag.Hash)
+	}
+
+	// Topic should have hash from A + Topic
+	expectedTopicHash := idgen.HashFrom("ATopic")
+	if topicTag.Hash != expectedTopicHash {
+		t.Errorf("Topic tag hash should be %s, got %s", expectedTopicHash, topicTag.Hash)
+	}
+}
+
 func TestTagHashGeneration(t *testing.T) {
 	// Create a simple AST with a header hierarchy
 	ast := &parser.AbstractSyntaxTree{

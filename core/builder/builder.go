@@ -173,19 +173,18 @@ func buildTagHierarchy(parentTag tree.TagContainer, headerParts []string) *tree.
 	}
 
 	if currentTag == nil {
-		// For the first header part, create as root-level tag (no parent hash)
-		// For subsequent parts, create with parent-based hash
-		var parentTitle string
-		if root, ok := parentTag.(*tree.Root); ok {
-			parentTitle = root.Title
-		} else if tag, ok := parentTag.(*tree.Tag); ok {
-			parentTitle = tag.Title
-		}
+		// Check if this is a top-level tag (parent is Root)
+		_, isRootParent := parentTag.(*tree.Root)
 
-		if parentTitle == "TestFile" || parentTitle == "Root" {
+		if isRootParent {
+			// For top-level tags (categories), always create without parent hash
+			// This ensures consistent hashing across different files
 			currentTag = tree.NewTag(headerParts[0])
 		} else {
-			currentTag = tree.NewTagWithParent(headerParts[0], parentTitle)
+			// For nested tags, create with parent-based hash
+			if tag, ok := parentTag.(*tree.Tag); ok {
+				currentTag = tree.NewTagWithParent(headerParts[0], tag.Title)
+			}
 		}
 		parentTag.AddChildTag(currentTag)
 	}
