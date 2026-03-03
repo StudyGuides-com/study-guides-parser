@@ -26,6 +26,27 @@ type TagTypeAssignable interface {
 	GetContext() ontology.ContextType
 }
 
+type Overview struct {
+	Introduction         string `json:"introduction,omitempty"`
+	Etymology            string `json:"etymology,omitempty"`
+	Classification       string `json:"classification,omitempty"`
+	HistoricalBackground string `json:"historicalBackground,omitempty"`
+	PhysicalDescription  string `json:"physicalDescription,omitempty"`
+	HabitatContext       string `json:"habitatContext,omitempty"`
+	BehaviorFunction     string `json:"behaviorFunction,omitempty"`
+	DietDependencies     string `json:"dietDependencies,omitempty"`
+	LifecycleDevelopment string `json:"lifecycleDevelopment,omitempty"`
+	CulturalRelevance    string `json:"culturalRelevance,omitempty"`
+	NotableExamples      string `json:"notableExamples,omitempty"`
+	Controversies        string `json:"controversies,omitempty"`
+	CurrentStatus        string `json:"currentStatus,omitempty"`
+	FunFacts             string `json:"funFacts,omitempty"`
+	LegalEthical         string `json:"legalEthical,omitempty"`
+	SymbolismMythology   string `json:"symbolismMythology,omitempty"`
+	ImpactLegacy         string `json:"impactLegacy,omitempty"`
+	AdditionalInsights   string `json:"additionalInsights,omitempty"`
+}
+
 type Tag struct {
 	Title              string                     `json:"title"`
 	TagType            ontology.TagType           `json:"tag_type,omitempty"`
@@ -35,6 +56,7 @@ type Tag struct {
 	ContentDescriptors []string                   `json:"content_descriptors"`
 	MetaTags           []string                   `json:"meta_tags"`
 	Hash               string                     `json:"hash,omitempty"`
+	Overview           *Overview                  `json:"overview,omitempty"`
 	Questions          []*Question                `json:"questions,omitempty"`
 	Passages           []*Passage                 `json:"passages,omitempty"`
 	ChildTags          []*Tag                     `json:"child_tags"`
