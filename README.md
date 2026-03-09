@@ -1,289 +1,263 @@
-# Study Guides Parser Library
+# Study Guides Parser
 
-A Go library for parsing study guides into structured Abstract Syntax Trees (ASTs). Currently supports multiple formats including college study guides, AP exams, certifications, and more.
+A Go library and development server for parsing educational study guide content into structured hierarchical data. Converts plain text documents into Abstract Syntax Trees (ASTs) and tree structures containing tags, questions, and passages.
 
-## Current State
+## Installation
 
-The library provides a robust parsing pipeline but requires significant manual work from users to handle format conversions and pipeline orchestration.
-
-### Current Pain Points
-
-- **Multiple incompatible token formats**: Users must manually convert between `lexer.LineInfo`, `preparser.ParsedLineInfo`, and different token types
-- **Heavy boilerplate**: Users need to write conversion functions like `convertTokenType()` and `convertParsedValue()`
-- **Complex pipeline management**: Users must manually orchestrate lexer → scanner → parser flow
-- **Poor type safety**: Heavy use of `interface{}` makes it hard to work with parsed values
-
-### Current Usage (Complex)
-
-```go
-// Current heavy lifting required
-tokens := getScannerOutput()
-var lines []preparser.ParsedLineInfo
-for _, token := range tokens {
-    parsedLine := preparser.ParsedLineInfo{
-        Number:      token.Number,
-        Text:        token.Text,
-        Type:        convertTokenType(token.Type),
-        ParsedValue: convertParsedValue(token.ParsedValue, token.Type),
-    }
-    lines = append(lines, parsedLine)
-}
-parser := parser.NewParser(lines)
-ast, err := parser.Parse(parserType)
+```bash
+go get github.com/studyguides-com/study-guides-parser
 ```
 
-## Improvements Status
+**Requirements:** Go 1.20+
 
-### ✅ Phase 1 Complete: Simple API (Implemented)
+## Quick Start
 
-We've successfully implemented the simple API! Users can now parse study guides with just one function call instead of the previous 20+ lines of boilerplate.
-
-**New Simple Usage:**
+### Programmatic Usage
 
 ```go
-// Super simple - just one function call
-ast, err := processor.ParseFile("study_guide.txt", config.NewMetadata("colleges"))
-if err != nil {
-    log.Fatal(err)
-}
-
-// Or from strings
-lines := []string{"Mathematics Study Guide", "Colleges: Virginia: ODU: MATH 101: Linear Equations", "1. What is x? - A variable"}
-ast, err := processor.Parse(lines, config.NewMetadata("colleges"))
-```
-
-**Available Functions:**
-
-- `processor.ParseFile(filename, metadata)` - Parse directly from a file
-- `processor.Parse(lines, metadata)` - Parse from string slices
-- `processor.Preparse(lines, metadata)` - Preprocess and tokenize
-- `processor.Lex(lines, metadata)` - Lexical analysis only
-
-**Supported Parser Types:**
-
-- `config.NewMetadata("colleges")` - College study guides
-- `config.NewMetadata("ap_exams")` - AP exam study guides
-- `config.NewMetadata("certifications")` - Certification study guides
-- `config.NewMetadata("dod")` - Department of Defense study guides
-- `config.NewMetadata("entrance_exams")` - Entrance exam study guides
-
-### 🔄 Remaining Phases
-
-We're working to make this library even better. The remaining phases will:
-
-### Target Usage (Simple)
-
-```go
-// Super simple - just one function call
-ast, err := processor.ParseFile("study_guide.txt", processor.Colleges)
-if err != nil {
-    log.Fatal(err)
-}
-
-// Output as JSON
-jsonData, _ := json.MarshalIndent(ast, "", "  ")
-fmt.Println(string(jsonData))
-```
-
-## Improvement Plan
-
-### Phase 1: Create Simple API (Week 1) - **HIGHEST PRIORITY**
-
-Create high-level functions that handle everything internally:
-
-```go
-// In core/processor/processor.go
-func ParseFile(filename string, parserType ParserType) (*AbstractSyntaxTree, error)
-func ParseLines(lines []string, parserType ParserType) (*AbstractSyntaxTree, error)
-func ParseTokens(tokens []Token, parserType ParserType) (*AbstractSyntaxTree, error)
-```
-
-**Benefits:**
-
-- 90% reduction in boilerplate code
-- Single function call for most use cases
-- Automatic internal conversions
-
-### Phase 2: Unify Token Types (Week 2)
-
-Create a unified token format that works across all packages:
-
-```go
-// In core/types/token.go
-type Token struct {
-    Number      int         `json:"number"`
-    Text        string      `json:"text"`
-    Type        TokenType   `json:"type"`
-    ParsedValue ParsedValue `json:"parsed_value,omitempty"`
-}
-
-type TokenType string
-
-const (
-    TokenTypeFileHeader TokenType = "file_header"
-    TokenTypeHeader     TokenType = "header"
-    TokenTypeQuestion   TokenType = "question"
-    TokenTypeContent    TokenType = "content"
-    // ... etc
+import (
+    "github.com/studyguides-com/study-guides-parser/core/processor"
+    "github.com/studyguides-com/study-guides-parser/core/config"
 )
-```
 
-**Benefits:**
+// Parse from file
+result, err := processor.ParseFile("study_guide.txt", config.NewMetadata("colleges"))
 
-- No more manual token type conversions
-- Consistent format across all packages
-- Better JSON serialization
-
-### Phase 3: Improve Type Safety (Week 3)
-
-Replace `interface{}` with concrete types:
-
-```go
-type ParsedValue struct {
-    FileHeader *FileHeaderResult `json:"file_header,omitempty"`
-    Header     *HeaderResult     `json:"header,omitempty"`
-    Question   *QuestionResult   `json:"question,omitempty"`
-    Comment    *CommentResult    `json:"comment,omitempty"`
-    Passage    *PassageResult    `json:"passage,omitempty"`
-    LearnMore  *LearnMoreResult  `json:"learn_more,omitempty"`
-    Content    *ContentResult    `json:"content,omitempty"`
-    Empty      *EmptyLineResult  `json:"empty,omitempty"`
-    Binary     *BinaryResult     `json:"binary,omitempty"`
+// Parse from strings
+lines := []string{
+    "Mathematics Study Guide",
+    "Colleges: Virginia: ODU: MATH 101: Linear Equations",
+    "1. What is x? - A variable",
 }
+result, err := processor.Parse(lines, config.NewMetadata("colleges"))
+
+// Full pipeline to Tree (with tags, questions, passages)
+result, err := processor.Build(lines, config.NewMetadata("colleges"))
+tree := result.Tree
 ```
 
-**Benefits:**
+### Available Functions
 
-- Better type safety
-- Easier to work with parsed values
-- Better IDE support and autocomplete
+| Function | Description |
+|----------|-------------|
+| `processor.ParseFile(filename, metadata)` | Parse file to AST |
+| `processor.Parse(lines, metadata)` | Parse string slice to AST |
+| `processor.Build(lines, metadata)` | Full pipeline to Tree structure |
+| `processor.Preparse(lines, metadata)` | Tokenize and parse values |
+| `processor.Lex(lines, metadata)` | Lexical analysis only |
 
-### Phase 4: Add Convenience Features (Week 4)
+## Input Format
 
-- **Builder pattern** for advanced configuration
-- **Better error handling** with context and line numbers
-- **CLI tool** for testing and validation
-- **JSON helpers** for easy serialization
-
-## Supported Parser Types
-
-```go
-type ParserType string
-
-const (
-    Colleges        ParserType = "colleges"
-    APExams         ParserType = "ap_exams"
-    Certifications  ParserType = "certifications"
-    DOD             ParserType = "dod"
-    EntranceExams   ParserType = "entrance_exams"
-)
-```
-
-## Example Study Guide Format
+Study guides are plain text files with a specific structure:
 
 ```
-Study Guide: Mathematics
-Subject: Algebra
-Topic: Linear Equations
+Mathematics Study Guide
+Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations
 
-1. What is a linear equation?
-   A linear equation is an equation where the highest power of the variable is 1.
-
-2. How do you solve 2x + 3 = 7?
-   Subtract 3 from both sides: 2x = 4
-   Divide both sides by 2: x = 2
+1. What is a linear equation? - An equation where the highest power of the variable is 1.
+2. How do you solve 2x + 3 = 7? - Subtract 3 from both sides, then divide by 2.
 
 Learn More: See Khan Academy's linear equations course.
+
+Passage: Introduction to Linear Systems
+
+A linear system consists of two or more linear equations.
+
+1. What defines a linear system? - Two or more linear equations
 ```
 
-## Current Library Structure
+### Line Types
 
+| Type | Format | Example |
+|------|--------|---------|
+| File Header | First line of document | `Mathematics Study Guide` |
+| Header | Colon-separated hierarchy | `Colleges: Virginia: ODU: MATH 101` |
+| Question | `N. Question? - Answer` | `1. What is x? - A variable` |
+| Passage | `Passage: Title` | `Passage: Introduction` |
+| Learn More | `Learn More: Text` | `Learn More: See Khan Academy` |
+| Content | Body text | Any regular text |
+| Comment | Lines starting with `#` | `# This is a comment` |
+
+## Context Types
+
+Create metadata with the appropriate context type:
+
+```go
+config.NewMetadata("colleges")       // College study guides
+config.NewMetadata("certifications") // Professional certifications
+config.NewMetadata("ap_exams")       // AP exam prep
+config.NewMetadata("entrance_exams") // College entrance exams
+config.NewMetadata("dod")            // Department of Defense materials
 ```
-core/
-├── lexer/          # Token classification
-├── preparser/      # Token parsing and value extraction
-├── parser/         # AST construction
-├── cleanstring/    # Text cleaning utilities
-├── constants/      # Shared constants
-├── regexes/        # Regular expression patterns
-└── utils/          # Utility functions
+
+### Tag Hierarchies by Context
+
+Each context type has its own tag hierarchy:
+
+| Context | Hierarchy |
+|---------|-----------|
+| Colleges | Category > Region > University > Department > Course > Topic |
+| Certifications | Category > Certifying Agency > Certification > Domain > Module |
+| AP Exams | Category > AP Exam > Domain > Part > Topic |
+| Entrance Exams | Category > Entrance Exam > Section > Topic |
+| DoD | Category > Branch > Instruction Type > Instruction Group > Instruction > Chapter |
+
+## Output Structure
+
+### Tree Structure
+
+```go
+type Tree struct {
+    Root     *Tag
+    Metadata *Metadata
+}
+
+type Tag struct {
+    Title              string
+    TagType            TagType       // Category, Topic, Course, etc.
+    InsertID           string        // CUID for database insertion
+    Hash               string        // SHA256 for deduplication
+    Context            ContextType
+    ContentRating      ContentRatingType
+    ContentDescriptors []string
+    MetaTags           []string
+    Overview           *Overview
+    Questions          []*Question
+    Passages           []*Passage
+    ChildTags          []*Tag
+}
+
+type Question struct {
+    InsertID    string
+    Hash        string
+    Prompt      string
+    Answer      string
+    Distractors []string
+    LearnMore   string
+}
+
+type Passage struct {
+    InsertID  string
+    Hash      string
+    Title     string
+    Content   string
+    Questions []*Question
+}
 ```
 
-## Development
+## Development Server
 
-### Prerequisites
-
-- Go 1.20 or higher
-
-### Building
+A web server is included for testing and development:
 
 ```bash
-go build ./...
-```
-
-### Testing
-
-```bash
-go test ./...
-```
-
-### Development Server
-
-For easy testing and development, a web server is included:
-
-```bash
-# Option 1: Using make
+# Start the server
 make server
-
-# Option 2: Using the script
-./scripts/dev-server.sh
-
-# Option 3: Direct command
+# or
 go run cmd/server/main.go
 ```
 
-The server will start on `http://localhost:8000` and provides:
+Server runs at `http://localhost:8000` with an interactive web UI.
 
-- Web interface for testing parsing
-- Pre-loaded examples for each parser type
-- Real-time parsing results
-- API endpoints for programmatic access
+**Note:** Development use only. Do not expose to production.
 
-**⚠️ Development Only**: This server is for testing purposes only. Do not expose to clients or production environments.
+### API Endpoints
 
-### Running Examples
+All endpoints accept POST with JSON body:
 
-```bash
-# Process a study guide file
-go run examples/basic_usage.go input.txt
-
-# Validate a file
-go run examples/validate.go input.txt
+```json
+{
+  "content": "Your study guide content here",
+  "context_type": "Colleges"
+}
 ```
 
-## Contributing
+| Endpoint | Description | Returns |
+|----------|-------------|---------|
+| `POST /lex` | Tokenize text | Line tokens with types |
+| `POST /preparse` | Parse token values | Parsed line info |
+| `POST /parse` | Build AST | Abstract Syntax Tree |
+| `POST /build` | Full pipeline | Complete Tree structure |
+| `POST /hash` | Generate hash | SHA256 hash of input |
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+### Response Format
 
-### Development Priorities
+```json
+{
+  "success": true,
+  "tree": { ... },
+  "errors": []
+}
+```
 
-1. **Phase 1**: Implement simple API functions
-2. **Phase 2**: Unify token types across packages
-3. **Phase 3**: Improve type safety
-4. **Phase 4**: Add convenience features
+Errors include line numbers and context:
+
+```json
+{
+  "success": false,
+  "errors": [
+    {
+      "line_number": 1,
+      "message": "first line must be a file header",
+      "text": "Some Content",
+      "type": "content"
+    }
+  ]
+}
+```
+
+## Processing Pipeline
+
+The parser follows a 5-stage pipeline:
+
+```
+Text Input --> Lexer --> Preparser --> Parser --> Builder --> Tree
+                |           |            |          |          |
+             Tokens     Parsed        AST      Tag Types    Final
+                        Values                 Assigned     Output
+```
+
+1. **Lexer** - Classifies each line by type (header, question, etc.)
+2. **Preparser** - Extracts semantic values from tokens
+3. **Parser** - Builds Abstract Syntax Tree with hierarchy
+4. **Builder** - Creates domain objects, assigns tag types
+5. **Tree** - Final hierarchical structure with hashes and IDs
+
+## Hash Generation
+
+Hashes are used for database deduplication:
+
+- **Category tags**: `HashFrom(title)` - consistent across files
+- **Nested tags**: `HashFrom(parentTitle + title)` - unique under parent
+- **Questions/Passages**: Hash from content
+
+## Commands
+
+```bash
+make fmt      # Format code
+make test     # Run tests
+make build    # Build binary
+make server   # Start dev server
+
+go test ./...              # Run all tests
+go test ./core/builder/... # Test specific package
+```
+
+## Library Structure
+
+```
+core/
+├── builder/      # Tree construction from AST
+├── config/       # Metadata and configuration
+├── idgen/        # Hash and CUID generation
+├── lexer/        # Line tokenization
+├── ontology/     # Tag types and context types
+├── parser/       # AST construction
+├── preparser/    # Token value extraction
+├── processor/    # High-level API functions
+├── qa/           # Validation runner
+└── tree/         # Tree data structures
+```
 
 ## License
 
-[Add your license information here]
-
-## Support
-
-For questions, issues, or contributions, please:
-
-1. Check the [Issues](https://github.com/studyguides-com/study-guides-parser/issues) page
-2. Create a new issue with a clear description
-3. Include example input and expected output
-
----
-
-**Note**: This library is actively being improved to provide a super simple API. The current version requires manual pipeline management, but future versions will provide one-line parsing capabilities.
+[Add license information]
