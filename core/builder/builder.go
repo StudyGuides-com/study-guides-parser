@@ -103,6 +103,9 @@ func buildTree(node *parser.Node, currentTag tree.TagContainer) {
 			}
 			q := tree.NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
 			if tag, ok := currentTag.(*tree.Tag); ok {
+				if tag.Overview == nil {
+					tag.Overview = &tree.Overview{}
+				}
 				tag.Questions = append(tag.Questions, q)
 			}
 		}

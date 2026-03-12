@@ -260,6 +260,76 @@ func TestBuildTree(t *testing.T) {
 	if p2.Questions[0].Answer != "$10" {
 		t.Errorf("Expected passage answer '$10', got '%s'", p2.Questions[0].Answer)
 	}
+
+	// Check Overview is only present on tags with questions
+	if tagA.Overview != nil {
+		t.Errorf("Expected tagA.Overview to be nil (no questions), got non-nil")
+	}
+	if tagB.Overview != nil {
+		t.Errorf("Expected tagB.Overview to be nil (no questions), got non-nil")
+	}
+	if tagC.Overview != nil {
+		t.Errorf("Expected tagC.Overview to be nil (no questions), got non-nil")
+	}
+	if tagD.Overview == nil {
+		t.Fatalf("Expected tagD.Overview to be non-nil (has questions), got nil")
+	}
+
+	// Verify Overview struct fields exist (all should be empty strings by default)
+	if tagD.Overview.Introduction != "" {
+		t.Errorf("Expected empty Introduction, got '%s'", tagD.Overview.Introduction)
+	}
+	if tagD.Overview.Etymology != "" {
+		t.Errorf("Expected empty Etymology, got '%s'", tagD.Overview.Etymology)
+	}
+	if tagD.Overview.Classification != "" {
+		t.Errorf("Expected empty Classification, got '%s'", tagD.Overview.Classification)
+	}
+	if tagD.Overview.HistoricalBackground != "" {
+		t.Errorf("Expected empty HistoricalBackground, got '%s'", tagD.Overview.HistoricalBackground)
+	}
+	if tagD.Overview.PhysicalDescription != "" {
+		t.Errorf("Expected empty PhysicalDescription, got '%s'", tagD.Overview.PhysicalDescription)
+	}
+	if tagD.Overview.HabitatContext != "" {
+		t.Errorf("Expected empty HabitatContext, got '%s'", tagD.Overview.HabitatContext)
+	}
+	if tagD.Overview.BehaviorFunction != "" {
+		t.Errorf("Expected empty BehaviorFunction, got '%s'", tagD.Overview.BehaviorFunction)
+	}
+	if tagD.Overview.DietDependencies != "" {
+		t.Errorf("Expected empty DietDependencies, got '%s'", tagD.Overview.DietDependencies)
+	}
+	if tagD.Overview.LifecycleDevelopment != "" {
+		t.Errorf("Expected empty LifecycleDevelopment, got '%s'", tagD.Overview.LifecycleDevelopment)
+	}
+	if tagD.Overview.CulturalRelevance != "" {
+		t.Errorf("Expected empty CulturalRelevance, got '%s'", tagD.Overview.CulturalRelevance)
+	}
+	if tagD.Overview.NotableExamples != "" {
+		t.Errorf("Expected empty NotableExamples, got '%s'", tagD.Overview.NotableExamples)
+	}
+	if tagD.Overview.Controversies != "" {
+		t.Errorf("Expected empty Controversies, got '%s'", tagD.Overview.Controversies)
+	}
+	if tagD.Overview.CurrentStatus != "" {
+		t.Errorf("Expected empty CurrentStatus, got '%s'", tagD.Overview.CurrentStatus)
+	}
+	if tagD.Overview.FunFacts != "" {
+		t.Errorf("Expected empty FunFacts, got '%s'", tagD.Overview.FunFacts)
+	}
+	if tagD.Overview.LegalEthical != "" {
+		t.Errorf("Expected empty LegalEthical, got '%s'", tagD.Overview.LegalEthical)
+	}
+	if tagD.Overview.SymbolismMythology != "" {
+		t.Errorf("Expected empty SymbolismMythology, got '%s'", tagD.Overview.SymbolismMythology)
+	}
+	if tagD.Overview.ImpactLegacy != "" {
+		t.Errorf("Expected empty ImpactLegacy, got '%s'", tagD.Overview.ImpactLegacy)
+	}
+	if tagD.Overview.AdditionalInsights != "" {
+		t.Errorf("Expected empty AdditionalInsights, got '%s'", tagD.Overview.AdditionalInsights)
+	}
 }
 
 func TestBuildTree_JSONOutput(t *testing.T) {

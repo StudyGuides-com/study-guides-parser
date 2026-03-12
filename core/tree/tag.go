@@ -27,24 +27,24 @@ type TagTypeAssignable interface {
 }
 
 type Overview struct {
-	Introduction         string `json:"introduction,omitempty"`
-	Etymology            string `json:"etymology,omitempty"`
-	Classification       string `json:"classification,omitempty"`
-	HistoricalBackground string `json:"historicalBackground,omitempty"`
-	PhysicalDescription  string `json:"physicalDescription,omitempty"`
-	HabitatContext       string `json:"habitatContext,omitempty"`
-	BehaviorFunction     string `json:"behaviorFunction,omitempty"`
-	DietDependencies     string `json:"dietDependencies,omitempty"`
-	LifecycleDevelopment string `json:"lifecycleDevelopment,omitempty"`
-	CulturalRelevance    string `json:"culturalRelevance,omitempty"`
-	NotableExamples      string `json:"notableExamples,omitempty"`
-	Controversies        string `json:"controversies,omitempty"`
-	CurrentStatus        string `json:"currentStatus,omitempty"`
-	FunFacts             string `json:"funFacts,omitempty"`
-	LegalEthical         string `json:"legalEthical,omitempty"`
-	SymbolismMythology   string `json:"symbolismMythology,omitempty"`
-	ImpactLegacy         string `json:"impactLegacy,omitempty"`
-	AdditionalInsights   string `json:"additionalInsights,omitempty"`
+	Introduction         string `json:"introduction"`
+	Etymology            string `json:"etymology"`
+	Classification       string `json:"classification"`
+	HistoricalBackground string `json:"historicalBackground"`
+	PhysicalDescription  string `json:"physicalDescription"`
+	HabitatContext       string `json:"habitatContext"`
+	BehaviorFunction     string `json:"behaviorFunction"`
+	DietDependencies     string `json:"dietDependencies"`
+	LifecycleDevelopment string `json:"lifecycleDevelopment"`
+	CulturalRelevance    string `json:"culturalRelevance"`
+	NotableExamples      string `json:"notableExamples"`
+	Controversies        string `json:"controversies"`
+	CurrentStatus        string `json:"currentStatus"`
+	FunFacts             string `json:"funFacts"`
+	LegalEthical         string `json:"legalEthical"`
+	SymbolismMythology   string `json:"symbolismMythology"`
+	ImpactLegacy         string `json:"impactLegacy"`
+	AdditionalInsights   string `json:"additionalInsights"`
 }
 
 type Tag struct {
