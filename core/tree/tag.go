@@ -56,7 +56,7 @@ type Tag struct {
 	ContentDescriptors []string                   `json:"content_descriptors"`
 	MetaTags           []string                   `json:"meta_tags"`
 	Hash               string                     `json:"hash,omitempty"`
-	Overview           *Overview                  `json:"overview,omitempty"`
+	Overview           *Overview                  `json:"overview"`
 	Questions          []*Question                `json:"questions,omitempty"`
 	Passages           []*Passage                 `json:"passages,omitempty"`
 	ChildTags          []*Tag                     `json:"child_tags"`
