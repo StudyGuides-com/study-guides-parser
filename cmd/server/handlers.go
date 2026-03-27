@@ -182,6 +182,8 @@ func isValidContextType(contextType string) bool {
 		"APExams",
 		"UserGeneratedContent",
 		"DoD",
+		"Encyclopedia",
+		"General",
 		"None",
 	}
 
