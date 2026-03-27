@@ -169,4 +169,10 @@ var tagOntology = []TagOntology{
 		TagTypeRange,
 		TagTypeTopic,
 	}},
+
+	// General
+	{ContextTypeGeneral, 2, []TagType{
+		TagTypeCategory,
+		TagTypeTopic,
+	}},
 }

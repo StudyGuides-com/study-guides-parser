@@ -11,6 +11,7 @@ const (
 	ContextTypeUserGeneratedContent ContextType = "UserGeneratedContent"
 	ContextTypeDoD                  ContextType = "DoD"
 	ContextTypeEncyclopedia         ContextType = "Encyclopedia"
+	ContextTypeGeneral              ContextType = "General"
 	ContextTypeNone                 ContextType = "None"
 )
 

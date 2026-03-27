@@ -40,6 +40,16 @@ func TestFindTagOntology(t *testing.T) {
 			},
 		},
 		{
+			name:        "General depth 2",
+			contextType: ContextTypeGeneral,
+			depth:       2,
+			expected: &TagOntology{
+				ContextType:  ContextTypeGeneral,
+				HeaderLength: 2,
+				TagTypes:     []TagType{TagTypeCategory, TagTypeTopic},
+			},
+		},
+		{
 			name:        "Non-existent combination",
 			contextType: ContextTypeColleges,
 			depth:       2,
