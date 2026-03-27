@@ -40,13 +40,13 @@ func TestFindTagOntology(t *testing.T) {
 			},
 		},
 		{
-			name:        "General depth 2",
+			name:        "General depth 3",
 			contextType: ContextTypeGeneral,
-			depth:       2,
+			depth:       3,
 			expected: &TagOntology{
 				ContextType:  ContextTypeGeneral,
-				HeaderLength: 2,
-				TagTypes:     []TagType{TagTypeCategory, TagTypeTopic},
+				HeaderLength: 3,
+				TagTypes:     []TagType{TagTypeCategory, TagTypeSubCategory, TagTypeTopic},
 			},
 		},
 		{
