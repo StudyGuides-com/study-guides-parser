@@ -11,25 +11,32 @@ A Go-based parser system for processing educational study guide content into str
 3. **Parser** (`core/parser/`) - Builds Abstract Syntax Tree (AST)
 4. **Builder** (`core/builder/`) - Constructs hierarchical tree from AST
 5. **Tree** (`core/tree/`) - Final hierarchical data structure
+6. **Processor** (`core/processor/`) - Orchestrates pipeline stages, used by HTTP handlers
 
 ### Key Components
 
 #### Tag System (`core/tree/tag.go`)
-- Tags form hierarchical structure (Category → Volume → Range → Topic)
+- Tags form hierarchical structures based on context type (see Ontology below)
 - Each tag has unique hash for database deduplication
 - InsertID is pre-generated CUID for database insertion
 
 #### Hash Generation (`core/idgen/`)
-- Category tags: `HashFrom(title)` - consistent across files
+- Top-level tags: `HashFrom(title)` - consistent across files
 - Nested tags: `HashFrom(parentTitle + title)` - ensures uniqueness under parent
 - Questions/Passages: Hash from content for deduplication
 
-## Recent Fixes
+#### Ontology System (`core/ontology/`)
+Tag types are assigned based on context and tree depth. Each context type defines its own hierarchy:
+- **Colleges**: Category → Region → University → Department → Course → Topic
+- **Certifications**: Category → CertifyingAgency → Certification → Domain → Module → Topic
+- **EntranceExams**: Category → EntranceExam → Module → Topic
+- **APExams**: Category → APExam → Module → Topic
+- **DoD**: Category → Branch → InstructionType → InstructionGroup → Instruction → Section
+- **Encyclopedia**: Category → Volume → Range → Topic
+- **General**: Category → SubCategory → Topic
 
-### Category Tag Duplication Bug (Fixed v0.2.1)
-**Issue**: Category tags were getting different hashes when imported from different files
-**Root Cause**: Hash was computed using file header as parent: `HashFrom(fileHeader + "Encyclopedia")`
-**Solution**: Modified `builder.go:175-190` to detect root-level tags and hash without parent
+#### Schema Versioning (`core/schema/`)
+All API responses include `schema_type` and `schema_version` for client compatibility.
 
 ## Development Workflow
 
@@ -57,6 +64,8 @@ Server runs on `:8000` with endpoints:
 - `POST /build` - Build complete tree
 - `POST /hash` - Generate hash for value
 
+All endpoints accept `context_type` in the request body for tag type assignment.
+
 ## Context Types
 Valid context types for tag assignment:
 - Colleges
@@ -65,18 +74,19 @@ Valid context types for tag assignment:
 - APExams
 - UserGeneratedContent
 - DoD
+- Encyclopedia
+- General
 - None (default)
 
 ## Important Implementation Details
 
 ### Tag Type Assignment
-Tags are assigned types based on depth and context via `tree.AssignTagTypes()`
+Tags are assigned types based on depth and context via `tree.AssignTagTypes()`. The ontology system (`core/ontology/data.go`) defines the mapping.
 
 ### QA System
-QA runner validates:
-- All tags have proper TagType
-- All tags have valid ContextType
-- Content ratings and descriptors (when enhanced)
+QA runner (`core/qa/`) validates:
+- All tags have proper TagType (not TagTypeNone)
+- All tags have valid ContextType (not ContextTypeNone)
 
 ### Hash Stability
-Critical for database: hashes must be consistent for deduplication to work
+Critical for database: hashes must be consistent for deduplication to work. Top-level (category) tags are hashed without parent to ensure consistency across files (see `builder.go:178-192`).
