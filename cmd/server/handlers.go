@@ -9,18 +9,12 @@ import (
 	"github.com/studyguides-com/study-guides-parser/core/idgen"
 	"github.com/studyguides-com/study-guides-parser/core/ontology"
 	"github.com/studyguides-com/study-guides-parser/core/processor"
+	"github.com/studyguides-com/study-guides-parser/core/schema"
 )
 
 type ParseRequest struct {
 	Content     string `json:"content" binding:"required"`
 	ContextType string `json:"context_type"`
-}
-
-type ParseResponse struct {
-	Success bool                        `json:"success"`
-	AST     interface{}                 `json:"ast,omitempty"`
-	Errors  []processor.ProcessingError `json:"errors,omitempty"`
-	Tree    interface{}                 `json:"tree,omitempty"`
 }
 
 type HashRequest struct {
@@ -44,21 +38,13 @@ func handleLex(c *gin.Context) {
 
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetadata("lex")
-	result, err := processor.Lex(lines, metadata)
+	result, err := processor.LexWithSchema(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lexing error: " + err.Error()})
 		return
 	}
 
-	response := ParseResponse{
-		Success: result.Success,
-		Errors:  result.Errors,
-	}
-	if result.Success {
-		response.AST = result.Tokens
-	}
-
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, result)
 }
 
 func handlePreparse(c *gin.Context) {
@@ -70,21 +56,13 @@ func handlePreparse(c *gin.Context) {
 
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetadata("preparse")
-	result, err := processor.Preparse(lines, metadata)
+	result, err := processor.PreparseWithSchema(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Preparsing error: " + err.Error()})
 		return
 	}
 
-	response := ParseResponse{
-		Success: result.Success,
-		Errors:  result.Errors,
-	}
-	if result.Success {
-		response.AST = result.Tokens
-	}
-
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, result)
 }
 
 func handleParse(c *gin.Context) {
@@ -108,21 +86,13 @@ func handleParse(c *gin.Context) {
 		metadata.ContextType = contextType
 	}
 
-	result, err := processor.Parse(lines, metadata)
+	result, err := processor.ParseWithSchema(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Parsing error: " + err.Error()})
 		return
 	}
 
-	response := ParseResponse{
-		Success: result.Success,
-		Errors:  result.Errors,
-	}
-	if result.Success && result.AST != nil {
-		response.AST = result.AST
-	}
-
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, result)
 }
 
 func handleBuild(c *gin.Context) {
@@ -146,31 +116,24 @@ func handleBuild(c *gin.Context) {
 		metadata.ContextType = contextType
 	}
 
-	result, err := processor.Build(lines, metadata)
+	result, err := processor.BuildWithSchema(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Build error: " + err.Error()})
 		return
 	}
 
-	response := ParseResponse{
-		Success: result.Success,
-		Errors:  result.Errors,
-	}
-	if result.Success && result.Tree != nil {
-		response.Tree = result.Tree
-	}
-
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, result)
 }
 
 func handleHash(c *gin.Context) {
 	var req HashRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "Invalid JSON: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
 		return
 	}
 	hash := idgen.HashFrom(req.Value)
-	c.JSON(200, HashResponse{Hash: hash})
+	response := schema.NewEnvelope(schema.SchemaTypeHash, HashResponse{Hash: hash})
+	c.JSON(http.StatusOK, response)
 }
 
 // isValidContextType validates that the provided context type is valid

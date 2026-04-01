@@ -10,6 +10,7 @@ import (
 	"github.com/studyguides-com/study-guides-parser/core/lexer"
 	"github.com/studyguides-com/study-guides-parser/core/parser"
 	"github.com/studyguides-com/study-guides-parser/core/preparser"
+	"github.com/studyguides-com/study-guides-parser/core/schema"
 	"github.com/studyguides-com/study-guides-parser/core/tree"
 )
 
@@ -244,4 +245,40 @@ func BuildFromParse(p *ParserOutput, metadata *config.Metadata) (*BuilderOutput,
 		Tree:    tree,
 		Success: true,
 	}, nil
+}
+
+// LexWithSchema wraps Lex output in a schema envelope
+func LexWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[LexerOutput], error) {
+	result, err := Lex(lines, metadata)
+	if err != nil {
+		return schema.Envelope[LexerOutput]{}, err
+	}
+	return schema.NewEnvelope(schema.SchemaTypeLexer, result), nil
+}
+
+// PreparseWithSchema wraps Preparse output in a schema envelope
+func PreparseWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[PreparserOutput], error) {
+	result, err := Preparse(lines, metadata)
+	if err != nil {
+		return schema.Envelope[PreparserOutput]{}, err
+	}
+	return schema.NewEnvelope(schema.SchemaTypePreparser, result), nil
+}
+
+// ParseWithSchema wraps Parse output in a schema envelope
+func ParseWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[*ParserOutput], error) {
+	result, err := Parse(lines, metadata)
+	if err != nil {
+		return schema.Envelope[*ParserOutput]{}, err
+	}
+	return schema.NewEnvelope(schema.SchemaTypeParser, result), nil
+}
+
+// BuildWithSchema wraps Build output in a schema envelope
+func BuildWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[*BuilderOutput], error) {
+	result, err := Build(lines, metadata)
+	if err != nil {
+		return schema.Envelope[*BuilderOutput]{}, err
+	}
+	return schema.NewEnvelope(schema.SchemaTypeBuilder, result), nil
 }
