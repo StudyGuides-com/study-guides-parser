@@ -1,11 +1,13 @@
 package processor
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/studyguides-com/study-guides-parser/core/config"
+	"github.com/studyguides-com/study-guides-parser/core/schema"
 )
 
 func TestParse(t *testing.T) {
@@ -327,6 +329,93 @@ func TestPreparseReturnsOnlyPreparserErrors(t *testing.T) {
 	if len(result.Tokens) != 5 {
 		t.Errorf("Expected 5 valid tokens, got %d", len(result.Tokens))
 	}
+}
+
+func TestSchemaFieldsInOutputs(t *testing.T) {
+	lines := []string{
+		"Test Guide",
+		"TagA: TagB: TagC: TagD",
+		"",
+		"1. What is 1 + 1? - 2",
+	}
+	metadata := config.NewMetadata("test")
+
+	t.Run("LexerOutput has schema fields", func(t *testing.T) {
+		result, err := Lex(lines, metadata)
+		if err != nil {
+			t.Fatalf("Lex() error: %v", err)
+		}
+		if result.SchemaType != schema.SchemaTypeLexer {
+			t.Errorf("SchemaType = %s, want %s", result.SchemaType, schema.SchemaTypeLexer)
+		}
+		if result.SchemaVersion != schema.Version {
+			t.Errorf("SchemaVersion = %s, want %s", result.SchemaVersion, schema.Version)
+		}
+
+		// Verify JSON output has schema fields at top level
+		jsonBytes, _ := json.Marshal(result)
+		var output map[string]interface{}
+		json.Unmarshal(jsonBytes, &output)
+		if output["schema_type"] != "lexer" {
+			t.Errorf("JSON schema_type = %v, want lexer", output["schema_type"])
+		}
+		if _, hasData := output["data"]; hasData {
+			t.Error("JSON should not have nested 'data' field")
+		}
+	})
+
+	t.Run("PreparserOutput has schema fields", func(t *testing.T) {
+		result, err := Preparse(lines, metadata)
+		if err != nil {
+			t.Fatalf("Preparse() error: %v", err)
+		}
+		if result.SchemaType != schema.SchemaTypePreparser {
+			t.Errorf("SchemaType = %s, want %s", result.SchemaType, schema.SchemaTypePreparser)
+		}
+		if result.SchemaVersion != schema.Version {
+			t.Errorf("SchemaVersion = %s, want %s", result.SchemaVersion, schema.Version)
+		}
+	})
+
+	t.Run("ParserOutput has schema fields", func(t *testing.T) {
+		result, err := Parse(lines, metadata)
+		if err != nil {
+			t.Fatalf("Parse() error: %v", err)
+		}
+		if result.SchemaType != schema.SchemaTypeParser {
+			t.Errorf("SchemaType = %s, want %s", result.SchemaType, schema.SchemaTypeParser)
+		}
+		if result.SchemaVersion != schema.Version {
+			t.Errorf("SchemaVersion = %s, want %s", result.SchemaVersion, schema.Version)
+		}
+	})
+
+	t.Run("BuilderOutput has schema fields", func(t *testing.T) {
+		result, err := Build(lines, metadata)
+		if err != nil {
+			t.Fatalf("Build() error: %v", err)
+		}
+		if result.SchemaType != schema.SchemaTypeBuilder {
+			t.Errorf("SchemaType = %s, want %s", result.SchemaType, schema.SchemaTypeBuilder)
+		}
+		if result.SchemaVersion != schema.Version {
+			t.Errorf("SchemaVersion = %s, want %s", result.SchemaVersion, schema.Version)
+		}
+
+		// Verify JSON output structure
+		jsonBytes, _ := json.Marshal(result)
+		var output map[string]interface{}
+		json.Unmarshal(jsonBytes, &output)
+		if output["schema_type"] != "builder" {
+			t.Errorf("JSON schema_type = %v, want builder", output["schema_type"])
+		}
+		if output["schema_version"] != "1.0.0" {
+			t.Errorf("JSON schema_version = %v, want 1.0.0", output["schema_version"])
+		}
+		if _, hasData := output["data"]; hasData {
+			t.Error("JSON should not have nested 'data' field")
+		}
+	})
 }
 
 func TestParseFileWithLexerError(t *testing.T) {

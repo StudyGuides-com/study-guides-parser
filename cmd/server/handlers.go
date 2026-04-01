@@ -21,8 +21,10 @@ type HashRequest struct {
 	Value string `json:"value" binding:"required"`
 }
 
-type HashResponse struct {
-	Hash string `json:"hash"`
+type HashOutput struct {
+	SchemaType    schema.SchemaType `json:"schema_type"`
+	SchemaVersion string            `json:"schema_version"`
+	Hash          string            `json:"hash"`
 }
 
 func handleHome(c *gin.Context) {
@@ -38,7 +40,7 @@ func handleLex(c *gin.Context) {
 
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetadata("lex")
-	result, err := processor.LexWithSchema(lines, metadata)
+	result, err := processor.Lex(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lexing error: " + err.Error()})
 		return
@@ -56,7 +58,7 @@ func handlePreparse(c *gin.Context) {
 
 	lines := strings.Split(req.Content, "\n")
 	metadata := config.NewMetadata("preparse")
-	result, err := processor.PreparseWithSchema(lines, metadata)
+	result, err := processor.Preparse(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Preparsing error: " + err.Error()})
 		return
@@ -86,7 +88,7 @@ func handleParse(c *gin.Context) {
 		metadata.ContextType = contextType
 	}
 
-	result, err := processor.ParseWithSchema(lines, metadata)
+	result, err := processor.Parse(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Parsing error: " + err.Error()})
 		return
@@ -116,7 +118,7 @@ func handleBuild(c *gin.Context) {
 		metadata.ContextType = contextType
 	}
 
-	result, err := processor.BuildWithSchema(lines, metadata)
+	result, err := processor.Build(lines, metadata)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Build error: " + err.Error()})
 		return
@@ -132,7 +134,11 @@ func handleHash(c *gin.Context) {
 		return
 	}
 	hash := idgen.HashFrom(req.Value)
-	response := schema.NewEnvelope(schema.SchemaTypeHash, HashResponse{Hash: hash})
+	response := HashOutput{
+		SchemaType:    schema.SchemaTypeHash,
+		SchemaVersion: schema.Version,
+		Hash:          hash,
+	}
 	c.JSON(http.StatusOK, response)
 }
 

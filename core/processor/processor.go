@@ -24,30 +24,38 @@ type ProcessingError struct {
 }
 
 type LexerOutput struct {
-	Metadata *config.Metadata  `json:"metadata"`
-	Tokens   []lexer.LineInfo  `json:"tokens"`
-	Errors   []ProcessingError `json:"errors"`
-	Success  bool              `json:"success"`
+	SchemaType    schema.SchemaType `json:"schema_type"`
+	SchemaVersion string            `json:"schema_version"`
+	Metadata      *config.Metadata  `json:"metadata"`
+	Tokens        []lexer.LineInfo  `json:"tokens"`
+	Errors        []ProcessingError `json:"errors"`
+	Success       bool              `json:"success"`
 }
 
 type PreparserOutput struct {
-	Metadata *config.Metadata           `json:"metadata"`
-	Tokens   []preparser.ParsedLineInfo `json:"tokens"`
-	Errors   []ProcessingError          `json:"errors"`
-	Success  bool                       `json:"success"`
+	SchemaType    schema.SchemaType          `json:"schema_type"`
+	SchemaVersion string                     `json:"schema_version"`
+	Metadata      *config.Metadata           `json:"metadata"`
+	Tokens        []preparser.ParsedLineInfo `json:"tokens"`
+	Errors        []ProcessingError          `json:"errors"`
+	Success       bool                       `json:"success"`
 }
 
 // ParserOutput represents the result of parsing with structured errors
 type ParserOutput struct {
-	AST     *parser.AbstractSyntaxTree `json:"ast,omitempty"`
-	Errors  []ProcessingError          `json:"errors,omitempty"`
-	Success bool                       `json:"success"`
+	SchemaType    schema.SchemaType          `json:"schema_type"`
+	SchemaVersion string                     `json:"schema_version"`
+	AST           *parser.AbstractSyntaxTree `json:"ast,omitempty"`
+	Errors        []ProcessingError          `json:"errors,omitempty"`
+	Success       bool                       `json:"success"`
 }
 
 type BuilderOutput struct {
-	Tree    *tree.Tree        `json:"tree,omitempty"`
-	Errors  []ProcessingError `json:"errors,omitempty"`
-	Success bool              `json:"success"`
+	SchemaType    schema.SchemaType `json:"schema_type"`
+	SchemaVersion string            `json:"schema_version"`
+	Tree          *tree.Tree        `json:"tree,omitempty"`
+	Errors        []ProcessingError `json:"errors,omitempty"`
+	Success       bool              `json:"success"`
 }
 
 // ParseFile reads a file and parses it into an Abstract Syntax Tree
@@ -68,8 +76,10 @@ func Parse(lines []string, metadata *config.Metadata) (*ParserOutput, error) {
 	}
 	if !preOut.Success {
 		return &ParserOutput{
-			Errors:  preOut.Errors,
-			Success: false,
+			SchemaType:    schema.SchemaTypeParser,
+			SchemaVersion: schema.Version,
+			Errors:        preOut.Errors,
+			Success:       false,
 		}, nil
 	}
 
@@ -81,8 +91,10 @@ func ParseFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Pars
 	// If preparser failed, return immediately with preparser errors
 	if !preOut.Success {
 		return &ParserOutput{
-			Errors:  preOut.Errors,
-			Success: false,
+			SchemaType:    schema.SchemaTypeParser,
+			SchemaVersion: schema.Version,
+			Errors:        preOut.Errors,
+			Success:       false,
 		}, nil
 	}
 
@@ -98,13 +110,17 @@ func ParseFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Pars
 			Type:       string(parserErr.LineInfo.Type),
 		}
 		return &ParserOutput{
-			Errors:  []ProcessingError{parserError},
-			Success: false,
+			SchemaType:    schema.SchemaTypeParser,
+			SchemaVersion: schema.Version,
+			Errors:        []ProcessingError{parserError},
+			Success:       false,
 		}, nil
 	}
 	return &ParserOutput{
-		AST:     ast,
-		Success: true,
+		SchemaType:    schema.SchemaTypeParser,
+		SchemaVersion: schema.Version,
+		AST:           ast,
+		Success:       true,
 	}, nil
 }
 
@@ -134,9 +150,11 @@ func Lex(lines []string, metadata *config.Metadata) (LexerOutput, error) {
 	}
 
 	return LexerOutput{
-		Tokens:  tokens,
-		Errors:  processingErrors,
-		Success: len(errors) == 0,
+		SchemaType:    schema.SchemaTypeLexer,
+		SchemaVersion: schema.Version,
+		Tokens:        tokens,
+		Errors:        processingErrors,
+		Success:       len(errors) == 0,
 	}, nil
 }
 
@@ -146,19 +164,23 @@ func Preparse(lines []string, metadata *config.Metadata) (PreparserOutput, error
 	if err != nil {
 		// If there's a critical error with the lexer itself, return it
 		return PreparserOutput{
-			Metadata: metadata,
-			Errors:   []ProcessingError{{LineNumber: 0, Message: err.Error(), Code: "CRITICAL_ERROR"}},
-			Success:  false,
+			SchemaType:    schema.SchemaTypePreparser,
+			SchemaVersion: schema.Version,
+			Metadata:      metadata,
+			Errors:        []ProcessingError{{LineNumber: 0, Message: err.Error(), Code: "CRITICAL_ERROR"}},
+			Success:       false,
 		}, err
 	}
 
 	// If lexer failed, return immediately with lexer errors
 	if !lexOut.Success {
 		return PreparserOutput{
-			Metadata: metadata,
-			Tokens:   nil,
-			Errors:   lexOut.Errors,
-			Success:  false,
+			SchemaType:    schema.SchemaTypePreparser,
+			SchemaVersion: schema.Version,
+			Metadata:      metadata,
+			Tokens:        nil,
+			Errors:        lexOut.Errors,
+			Success:       false,
 		}, nil
 	}
 
@@ -171,9 +193,11 @@ func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
 	// If lexer failed, return immediately with lexer errors
 	if !lexOut.Success {
 		return PreparserOutput{
-			Tokens:  nil,
-			Errors:  lexOut.Errors,
-			Success: false,
+			SchemaType:    schema.SchemaTypePreparser,
+			SchemaVersion: schema.Version,
+			Tokens:        nil,
+			Errors:        lexOut.Errors,
+			Success:       false,
 		}, nil
 	}
 
@@ -194,9 +218,11 @@ func PreparseFromLex(lexOut LexerOutput) (PreparserOutput, error) {
 	}
 
 	return PreparserOutput{
-		Tokens:  parsed,
-		Errors:  allErrors,
-		Success: len(allErrors) == 0,
+		SchemaType:    schema.SchemaTypePreparser,
+		SchemaVersion: schema.Version,
+		Tokens:        parsed,
+		Errors:        allErrors,
+		Success:       len(allErrors) == 0,
 	}, nil
 }
 
@@ -207,8 +233,10 @@ func Build(lines []string, metadata *config.Metadata) (*BuilderOutput, error) {
 	}
 	if !preOut.Success {
 		return &BuilderOutput{
-			Errors:  preOut.Errors,
-			Success: false,
+			SchemaType:    schema.SchemaTypeBuilder,
+			SchemaVersion: schema.Version,
+			Errors:        preOut.Errors,
+			Success:       false,
 		}, nil
 	}
 
@@ -220,8 +248,10 @@ func BuildFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Buil
 	// If preparser failed, return immediately with preparser errors
 	if !preOut.Success {
 		return &BuilderOutput{
-			Errors:  preOut.Errors,
-			Success: false,
+			SchemaType:    schema.SchemaTypeBuilder,
+			SchemaVersion: schema.Version,
+			Errors:        preOut.Errors,
+			Success:       false,
 		}, nil
 	}
 
@@ -231,8 +261,10 @@ func BuildFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Buil
 	}
 	if !parserOut.Success {
 		return &BuilderOutput{
-			Errors:  parserOut.Errors,
-			Success: false,
+			SchemaType:    schema.SchemaTypeBuilder,
+			SchemaVersion: schema.Version,
+			Errors:        parserOut.Errors,
+			Success:       false,
 		}, nil
 	}
 
@@ -242,43 +274,9 @@ func BuildFromPreparse(preOut PreparserOutput, metadata *config.Metadata) (*Buil
 func BuildFromParse(p *ParserOutput, metadata *config.Metadata) (*BuilderOutput, error) {
 	tree := builder.Build(p.AST, metadata)
 	return &BuilderOutput{
-		Tree:    tree,
-		Success: true,
+		SchemaType:    schema.SchemaTypeBuilder,
+		SchemaVersion: schema.Version,
+		Tree:          tree,
+		Success:       true,
 	}, nil
-}
-
-// LexWithSchema wraps Lex output in a schema envelope
-func LexWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[LexerOutput], error) {
-	result, err := Lex(lines, metadata)
-	if err != nil {
-		return schema.Envelope[LexerOutput]{}, err
-	}
-	return schema.NewEnvelope(schema.SchemaTypeLexer, result), nil
-}
-
-// PreparseWithSchema wraps Preparse output in a schema envelope
-func PreparseWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[PreparserOutput], error) {
-	result, err := Preparse(lines, metadata)
-	if err != nil {
-		return schema.Envelope[PreparserOutput]{}, err
-	}
-	return schema.NewEnvelope(schema.SchemaTypePreparser, result), nil
-}
-
-// ParseWithSchema wraps Parse output in a schema envelope
-func ParseWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[*ParserOutput], error) {
-	result, err := Parse(lines, metadata)
-	if err != nil {
-		return schema.Envelope[*ParserOutput]{}, err
-	}
-	return schema.NewEnvelope(schema.SchemaTypeParser, result), nil
-}
-
-// BuildWithSchema wraps Build output in a schema envelope
-func BuildWithSchema(lines []string, metadata *config.Metadata) (schema.Envelope[*BuilderOutput], error) {
-	result, err := Build(lines, metadata)
-	if err != nil {
-		return schema.Envelope[*BuilderOutput]{}, err
-	}
-	return schema.NewEnvelope(schema.SchemaTypeBuilder, result), nil
 }
