@@ -176,4 +176,12 @@ var tagOntology = []TagOntology{
 		TagTypeSubCategory,
 		TagTypeTopic,
 	}},
+
+	// High School
+	{ContextTypeHighSchool, 4, []TagType{
+		TagTypeCategory,
+		TagTypeDepartment,
+		TagTypeCourse,
+		TagTypeTopic,
+	}},
 }

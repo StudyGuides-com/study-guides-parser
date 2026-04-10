@@ -12,6 +12,7 @@ const (
 	ContextTypeDoD                  ContextType = "DoD"
 	ContextTypeEncyclopedia         ContextType = "Encyclopedia"
 	ContextTypeGeneral              ContextType = "General"
+	ContextTypeHighSchool           ContextType = "HighSchool"
 	ContextTypeNone                 ContextType = "None"
 )
 

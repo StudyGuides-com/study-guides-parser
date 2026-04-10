@@ -34,6 +34,7 @@ Tag types are assigned based on context and tree depth. Each context type define
 - **DoD**: Category → Branch → InstructionType → InstructionGroup → Instruction → Section
 - **Encyclopedia**: Category → Volume → Range → Topic
 - **General**: Category → SubCategory → Topic
+- **HighSchool**: Category → Department → Course → Topic
 
 #### Schema Versioning (`core/schema/`)
 All API responses include `schema_type` and `schema_version` for client compatibility.
@@ -76,6 +77,7 @@ Valid context types for tag assignment:
 - DoD
 - Encyclopedia
 - General
+- HighSchool
 - None (default)
 
 ## Important Implementation Details

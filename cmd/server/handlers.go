@@ -153,6 +153,7 @@ func isValidContextType(contextType string) bool {
 		"DoD",
 		"Encyclopedia",
 		"General",
+		"HighSchool",
 		"None",
 	}
 

@@ -88,6 +88,9 @@ config.NewMetadata("certifications") // Professional certifications
 config.NewMetadata("ap_exams")       // AP exam prep
 config.NewMetadata("entrance_exams") // College entrance exams
 config.NewMetadata("dod")            // Department of Defense materials
+config.NewMetadata("encyclopedia")   // Encyclopedia content
+config.NewMetadata("general")        // General educational content
+config.NewMetadata("high_school")    // High school curriculum
 ```
 
 ### Tag Hierarchies by Context
@@ -97,10 +100,13 @@ Each context type has its own tag hierarchy:
 | Context | Hierarchy |
 |---------|-----------|
 | Colleges | Category > Region > University > Department > Course > Topic |
-| Certifications | Category > Certifying Agency > Certification > Domain > Module |
-| AP Exams | Category > AP Exam > Domain > Part > Topic |
-| Entrance Exams | Category > Entrance Exam > Section > Topic |
-| DoD | Category > Branch > Instruction Type > Instruction Group > Instruction > Chapter |
+| Certifications | Category > Certifying Agency > Certification > Domain > Module > Topic |
+| AP Exams | Category > AP Exam > Module > Topic |
+| Entrance Exams | Category > Entrance Exam > Module > Topic |
+| DoD | Category > Branch > Instruction Type > Instruction Group > Instruction > Section |
+| Encyclopedia | Category > Volume > Range > Topic |
+| General | Category > SubCategory > Topic |
+| HighSchool | Category > Department > Course > Topic |
 
 ## Output Structure
 
