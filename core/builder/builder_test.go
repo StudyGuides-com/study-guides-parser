@@ -1238,3 +1238,210 @@ func TestTagHashGeneration(t *testing.T) {
 	t.Logf("TagB hash: %s", tagB.Hash)
 	t.Logf("TagC hash: %s", tagC.Hash)
 }
+
+func TestQuestionOrderAssignment(t *testing.T) {
+	// Create a test AST with multiple questions and passages under one tag
+	ast := &parser.AbstractSyntaxTree{
+		Metadata: &config.Metadata{
+			Options: map[string]string{"file": "test.txt"},
+			Type:    "info",
+		},
+		Root: &parser.Node{
+			Type: lexer.TokenTypeFileHeader,
+			Data: preparser.ParsedValue{
+				FileHeader: &preparser.FileHeaderResult{Title: "OrderTest"},
+			},
+			Children: []*parser.Node{
+				{
+					Type: lexer.TokenTypeHeader,
+					Data: preparser.ParsedValue{
+						Header: &preparser.HeaderResult{Parts: []string{"Topic1"}},
+					},
+					Children: []*parser.Node{
+						// Two standalone questions
+						{
+							Type: lexer.TokenTypeQuestion,
+							Data: preparser.ParsedValue{
+								Question: &preparser.QuestionResult{
+									QuestionText: "Q1?",
+									AnswerText:   "A1",
+								},
+							},
+						},
+						{
+							Type: lexer.TokenTypeQuestion,
+							Data: preparser.ParsedValue{
+								Question: &preparser.QuestionResult{
+									QuestionText: "Q2?",
+									AnswerText:   "A2",
+								},
+							},
+						},
+						// Passage with 2 questions
+						{
+							Type: lexer.TokenTypePassage,
+							Data: preparser.ParsedValue{
+								Passage: &preparser.PassageResult{Text: "Passage 1"},
+							},
+							Children: []*parser.Node{
+								{
+									Type: lexer.TokenTypeQuestion,
+									Data: preparser.ParsedValue{
+										Question: &preparser.QuestionResult{
+											QuestionText: "P1Q1?",
+											AnswerText:   "P1A1",
+										},
+									},
+								},
+								{
+									Type: lexer.TokenTypeQuestion,
+									Data: preparser.ParsedValue{
+										Question: &preparser.QuestionResult{
+											QuestionText: "P1Q2?",
+											AnswerText:   "P1A2",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	tree := Build(ast, ast.Metadata)
+
+	// Get the tag
+	if len(tree.Root.ChildTags) != 1 {
+		t.Fatalf("Expected 1 child tag, got %d", len(tree.Root.ChildTags))
+	}
+	topic1 := tree.Root.ChildTags[0]
+
+	// Verify standalone questions have order 1 and 2
+	if len(topic1.Questions) != 2 {
+		t.Fatalf("Expected 2 standalone questions, got %d", len(topic1.Questions))
+	}
+	if topic1.Questions[0].Order != 1 {
+		t.Errorf("Expected first standalone question order=1, got %d", topic1.Questions[0].Order)
+	}
+	if topic1.Questions[1].Order != 2 {
+		t.Errorf("Expected second standalone question order=2, got %d", topic1.Questions[1].Order)
+	}
+
+	// Verify passage questions continue sequence (order 3 and 4)
+	if len(topic1.Passages) != 1 {
+		t.Fatalf("Expected 1 passage, got %d", len(topic1.Passages))
+	}
+	if len(topic1.Passages[0].Questions) != 2 {
+		t.Fatalf("Expected 2 passage questions, got %d", len(topic1.Passages[0].Questions))
+	}
+	if topic1.Passages[0].Questions[0].Order != 3 {
+		t.Errorf("Expected first passage question order=3, got %d", topic1.Passages[0].Questions[0].Order)
+	}
+	if topic1.Passages[0].Questions[1].Order != 4 {
+		t.Errorf("Expected second passage question order=4, got %d", topic1.Passages[0].Questions[1].Order)
+	}
+}
+
+func TestQuestionOrderResetsPerTag(t *testing.T) {
+	// Create a test AST with questions in two different tags
+	ast := &parser.AbstractSyntaxTree{
+		Metadata: &config.Metadata{
+			Options: map[string]string{"file": "test.txt"},
+			Type:    "info",
+		},
+		Root: &parser.Node{
+			Type: lexer.TokenTypeFileHeader,
+			Data: preparser.ParsedValue{
+				FileHeader: &preparser.FileHeaderResult{Title: "OrderResetTest"},
+			},
+			Children: []*parser.Node{
+				{
+					Type: lexer.TokenTypeHeader,
+					Data: preparser.ParsedValue{
+						Header: &preparser.HeaderResult{Parts: []string{"Tag1"}},
+					},
+					Children: []*parser.Node{
+						{
+							Type: lexer.TokenTypeQuestion,
+							Data: preparser.ParsedValue{
+								Question: &preparser.QuestionResult{
+									QuestionText: "Tag1 Q1?",
+									AnswerText:   "A1",
+								},
+							},
+						},
+						{
+							Type: lexer.TokenTypeQuestion,
+							Data: preparser.ParsedValue{
+								Question: &preparser.QuestionResult{
+									QuestionText: "Tag1 Q2?",
+									AnswerText:   "A2",
+								},
+							},
+						},
+					},
+				},
+				{
+					Type: lexer.TokenTypeHeader,
+					Data: preparser.ParsedValue{
+						Header: &preparser.HeaderResult{Parts: []string{"Tag2"}},
+					},
+					Children: []*parser.Node{
+						{
+							Type: lexer.TokenTypeQuestion,
+							Data: preparser.ParsedValue{
+								Question: &preparser.QuestionResult{
+									QuestionText: "Tag2 Q1?",
+									AnswerText:   "B1",
+								},
+							},
+						},
+						{
+							Type: lexer.TokenTypeQuestion,
+							Data: preparser.ParsedValue{
+								Question: &preparser.QuestionResult{
+									QuestionText: "Tag2 Q2?",
+									AnswerText:   "B2",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	tree := Build(ast, ast.Metadata)
+
+	// Verify we have 2 top-level tags
+	if len(tree.Root.ChildTags) != 2 {
+		t.Fatalf("Expected 2 child tags, got %d", len(tree.Root.ChildTags))
+	}
+
+	tag1 := tree.Root.ChildTags[0]
+	tag2 := tree.Root.ChildTags[1]
+
+	// Verify Tag1 questions have order 1 and 2
+	if len(tag1.Questions) != 2 {
+		t.Fatalf("Expected 2 questions in Tag1, got %d", len(tag1.Questions))
+	}
+	if tag1.Questions[0].Order != 1 {
+		t.Errorf("Tag1 Q1: expected order=1, got %d", tag1.Questions[0].Order)
+	}
+	if tag1.Questions[1].Order != 2 {
+		t.Errorf("Tag1 Q2: expected order=2, got %d", tag1.Questions[1].Order)
+	}
+
+	// Verify Tag2 questions ALSO have order 1 and 2 (reset per tag)
+	if len(tag2.Questions) != 2 {
+		t.Fatalf("Expected 2 questions in Tag2, got %d", len(tag2.Questions))
+	}
+	if tag2.Questions[0].Order != 1 {
+		t.Errorf("Tag2 Q1: expected order=1 (reset), got %d", tag2.Questions[0].Order)
+	}
+	if tag2.Questions[1].Order != 2 {
+		t.Errorf("Tag2 Q2: expected order=2 (reset), got %d", tag2.Questions[1].Order)
+	}
+}

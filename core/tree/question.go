@@ -11,9 +11,10 @@ type Question struct {
 	Answer      string   `json:"answer"`
 	Distractors []string `json:"distractors"`
 	LearnMore   string   `json:"learn_more"`
+	Order       int      `json:"order"`
 }
 
-func NewQuestion(prompt string, answer string, distractors []string, learnMore string) *Question {
+func NewQuestion(prompt string, answer string, distractors []string, learnMore string, order int) *Question {
 	// If distractors is nil, create an empty slice
 	if distractors == nil {
 		distractors = []string{}
@@ -26,5 +27,6 @@ func NewQuestion(prompt string, answer string, distractors []string, learnMore s
 		Answer:      answer,
 		Distractors: distractors,
 		LearnMore:   learnMore,
+		Order:       order,
 	}
 }

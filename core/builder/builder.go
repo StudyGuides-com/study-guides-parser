@@ -19,7 +19,8 @@ func Build(ast *parser.AbstractSyntaxTree, metadata *config.Metadata) *tree.Tree
 	}
 
 	// Walk through the AST and build the tree
-	buildTree(ast.Root, tree.Root)
+	initialOrder := 0
+	buildTree(ast.Root, tree.Root, &initialOrder)
 
 	// Assign tag types based on context
 	if metadata.ContextType != ontology.ContextTypeNone {
@@ -45,7 +46,8 @@ func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata,
 	}
 
 	// Walk through the AST and build the tree
-	buildTree(ast.Root, tree.Root)
+	initialOrder := 0
+	buildTree(ast.Root, tree.Root, &initialOrder)
 
 	// Assign tag types based on the provided context
 	tree.AssignTagTypes(contextType)
@@ -60,7 +62,7 @@ func BuildWithContext(ast *parser.AbstractSyntaxTree, metadata *config.Metadata,
 	return tree
 }
 
-func buildTree(node *parser.Node, currentTag tree.TagContainer) {
+func buildTree(node *parser.Node, currentTag tree.TagContainer, questionOrder *int) {
 	if node == nil {
 		return
 	}
@@ -75,7 +77,7 @@ func buildTree(node *parser.Node, currentTag tree.TagContainer) {
 		}
 		// Process children
 		for _, child := range node.Children {
-			buildTree(child, currentTag)
+			buildTree(child, currentTag, questionOrder)
 		}
 
 	case lexer.TokenTypeHeader:
@@ -83,9 +85,11 @@ func buildTree(node *parser.Node, currentTag tree.TagContainer) {
 		if header := node.Data.GetHeader(); header != nil {
 			// Build the tag hierarchy from header parts
 			tag := buildTagHierarchy(currentTag, header.Parts)
+			// Create a new question order counter for this tag
+			tagQuestionOrder := 0
 			// Process children (questions, passages, etc.) and add them to the last tag
 			for _, child := range node.Children {
-				buildTree(child, tag)
+				buildTree(child, tag, &tagQuestionOrder)
 			}
 		}
 
@@ -101,7 +105,9 @@ func buildTree(node *parser.Node, currentTag tree.TagContainer) {
 					}
 				}
 			}
-			q := tree.NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
+			// Increment order counter and create question
+			*questionOrder++
+			q := tree.NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText, *questionOrder)
 			if tag, ok := currentTag.(*tree.Tag); ok {
 				if tag.Overview == nil {
 					tag.Overview = &tree.Overview{}
@@ -128,7 +134,9 @@ func buildTree(node *parser.Node, currentTag tree.TagContainer) {
 								}
 							}
 						}
-						q := tree.NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText)
+						// Increment order counter and create question
+						*questionOrder++
+						q := tree.NewQuestion(question.QuestionText, question.AnswerText, nil, learnMoreText, *questionOrder)
 						questions = append(questions, q)
 					}
 				} else if child.Type == lexer.TokenTypeContent {
@@ -153,7 +161,7 @@ func buildTree(node *parser.Node, currentTag tree.TagContainer) {
 	default:
 		// For other node types, just process children
 		for _, child := range node.Children {
-			buildTree(child, currentTag)
+			buildTree(child, currentTag, questionOrder)
 		}
 	}
 }
