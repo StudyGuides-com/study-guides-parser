@@ -60,8 +60,18 @@ func TestFindTagOntology(t *testing.T) {
 			},
 		},
 		{
+			name:        "College depth 4",
+			contextType: ContextTypeCollege,
+			depth:       4,
+			expected: &TagOntology{
+				ContextType:  ContextTypeCollege,
+				HeaderLength: 4,
+				TagTypes:     []TagType{TagTypeCategory, TagTypeDepartment, TagTypeCourse, TagTypeTopic},
+			},
+		},
+		{
 			name:        "Non-existent combination",
-			contextType: ContextTypeColleges,
+			contextType: ContextTypeCollege,
 			depth:       2,
 			expected:    nil,
 		},

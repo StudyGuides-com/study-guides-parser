@@ -82,11 +82,9 @@ var tagOntology = []TagOntology{
 		TagTypeTopic,
 	}},
 
-	// Colleges
-	{ContextTypeColleges, 6, []TagType{
+	// College
+	{ContextTypeCollege, 4, []TagType{
 		TagTypeCategory,
-		TagTypeRegion,
-		TagTypeUniversity,
 		TagTypeDepartment,
 		TagTypeCourse,
 		TagTypeTopic,

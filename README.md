@@ -21,18 +21,18 @@ import (
 )
 
 // Parse from file
-result, err := processor.ParseFile("study_guide.txt", config.NewMetadata("colleges"))
+result, err := processor.ParseFile("study_guide.txt", config.NewMetadata("college"))
 
 // Parse from strings
 lines := []string{
     "Mathematics Study Guide",
-    "Colleges: Virginia: ODU: MATH 101: Linear Equations",
+    "College: Mathematics: MATH 101: Linear Equations",
     "1. What is x? - A variable",
 }
-result, err := processor.Parse(lines, config.NewMetadata("colleges"))
+result, err := processor.Parse(lines, config.NewMetadata("college"))
 
 // Full pipeline to Tree (with tags, questions, passages)
-result, err := processor.Build(lines, config.NewMetadata("colleges"))
+result, err := processor.Build(lines, config.NewMetadata("college"))
 tree := result.Tree
 ```
 
@@ -52,7 +52,7 @@ Study guides are plain text files with a specific structure:
 
 ```
 Mathematics Study Guide
-Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations
+College: Mathematics: MATH 101: Linear Equations
 
 1. What is a linear equation? - An equation where the highest power of the variable is 1.
 2. How do you solve 2x + 3 = 7? - Subtract 3 from both sides, then divide by 2.
@@ -71,7 +71,7 @@ A linear system consists of two or more linear equations.
 | Type | Format | Example |
 |------|--------|---------|
 | File Header | First line of document | `Mathematics Study Guide` |
-| Header | Colon-separated hierarchy | `Colleges: Virginia: ODU: MATH 101` |
+| Header | Colon-separated hierarchy | `College: Mathematics: MATH 101` |
 | Question | `N. Question? - Answer` | `1. What is x? - A variable` |
 | Passage | `Passage: Title` | `Passage: Introduction` |
 | Learn More | `Learn More: Text` | `Learn More: See Khan Academy` |
@@ -83,7 +83,7 @@ A linear system consists of two or more linear equations.
 Create metadata with the appropriate context type:
 
 ```go
-config.NewMetadata("colleges")       // College study guides
+config.NewMetadata("college")        // College study guides
 config.NewMetadata("certifications") // Professional certifications
 config.NewMetadata("ap_exams")       // AP exam prep
 config.NewMetadata("entrance_exams") // College entrance exams
@@ -99,7 +99,7 @@ Each context type has its own tag hierarchy:
 
 | Context | Hierarchy |
 |---------|-----------|
-| Colleges | Category > Region > University > Department > Course > Topic |
+| College | Category > Department > Course > Topic |
 | Certifications | Category > Certifying Agency > Certification > Domain > Module > Topic |
 | AP Exams | Category > AP Exam > Module > Topic |
 | Entrance Exams | Category > Entrance Exam > Module > Topic |
@@ -173,7 +173,7 @@ All endpoints accept POST with JSON body:
 ```json
 {
   "content": "Your study guide content here",
-  "context_type": "Colleges"
+  "context_type": "College"
 }
 ```
 

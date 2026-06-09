@@ -27,7 +27,7 @@ A Go-based parser system for processing educational study guide content into str
 
 #### Ontology System (`core/ontology/`)
 Tag types are assigned based on context and tree depth. Each context type defines its own hierarchy:
-- **Colleges**: Category → Region → University → Department → Course → Topic
+- **College**: Category → Department → Course → Topic
 - **Certifications**: Category → CertifyingAgency → Certification → Domain → Module → Topic
 - **EntranceExams**: Category → EntranceExam → Module → Topic
 - **APExams**: Category → APExam → Module → Topic
@@ -69,7 +69,7 @@ All endpoints accept `context_type` in the request body for tag type assignment.
 
 ## Context Types
 Valid context types for tag assignment:
-- Colleges
+- College
 - Certifications
 - EntranceExams
 - APExams

@@ -145,7 +145,7 @@ func handleHash(c *gin.Context) {
 // isValidContextType validates that the provided context type is valid
 func isValidContextType(contextType string) bool {
 	validTypes := []string{
-		"Colleges",
+		"College",
 		"Certifications",
 		"EntranceExams",
 		"APExams",

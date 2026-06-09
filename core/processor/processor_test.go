@@ -22,7 +22,7 @@ func TestParse(t *testing.T) {
 			name: "valid college study guide",
 			lines: []string{
 				"Mathematics Study Guide",
-				"Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations",
+				"College: Mathematics: MATH 101: Linear Equations",
 				"",
 				"1. What is a linear equation? - An equation where the highest power of the variable is 1.",
 				"2. How do you solve 2x + 3 = 7? - Subtract 3 from both sides: 2x = 4, then divide by 2: x = 2.",
@@ -59,7 +59,7 @@ func TestParse(t *testing.T) {
 		{
 			name: "missing file header",
 			lines: []string{
-				"Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations",
+				"College: Mathematics: MATH 101: Linear Equations",
 				"1. What is x? - A variable",
 			},
 			metadata:      config.NewMetadata("test_parser"),
@@ -115,7 +115,7 @@ func TestParse(t *testing.T) {
 
 func TestParseFile(t *testing.T) {
 	testContent := `Test Mathematics Study Guide
-Colleges: Virginia: Old Dominion University (ODU): Mathematics (MATH): MATH 101: Linear Equations
+College: Mathematics: MATH 101: Linear Equations
 
 1. What is a linear equation? - An equation where the highest power of the variable is 1.
 2. How do you solve 2x + 3 = 7? - Subtract 3 from both sides: 2x = 4, then divide by 2: x = 2.
@@ -155,7 +155,7 @@ func TestMetadata(t *testing.T) {
 		parserType string
 		expected   string
 	}{
-		{"Colleges", "colleges", "colleges"},
+		{"College", "college", "college"},
 		{"APExams", "ap_exams", "ap_exams"},
 		{"Certifications", "certifications", "certifications"},
 		{"DOD", "dod", "dod"},

@@ -4,7 +4,7 @@ package ontology
 type ContextType string
 
 const (
-	ContextTypeColleges             ContextType = "Colleges"
+	ContextTypeCollege              ContextType = "College"
 	ContextTypeCertifications       ContextType = "Certifications"
 	ContextTypeEntranceExams        ContextType = "EntranceExams"
 	ContextTypeAPExams              ContextType = "APExams"
