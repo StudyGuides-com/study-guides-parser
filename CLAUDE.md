@@ -1,3 +1,5 @@
+@../study-guides-meta/CLAUDE.md
+
 # Study Guides Parser - Project Documentation
 
 ## Overview
